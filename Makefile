@@ -1,4 +1,4 @@
-IMAGE := nhits
+IMAGE := nhits_image.tar
 ROOT := $(shell dirname $(realpath $(firstword ${MAKEFILE_LIST})))
 PARENT_ROOT := $(shell dirname ${ROOT})
 PORT := 8888
@@ -15,7 +15,7 @@ endif
 
 init:
 #docker build -t ${IMAGE} .
-	sudo -Hu docker bash docker-run.sh build -t ${IMAGE} .
+	sudo -Hu docker bash docker-run.sh load --input ${IMAGE} .
 
 get_dataset:
 	$(MAKE) run_module module="mkdir -p data/"
