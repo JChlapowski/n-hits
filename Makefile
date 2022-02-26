@@ -13,8 +13,8 @@ ifdef gpu
 	DOCKER_PARAMETERS += --gpus all
 endif
 
-#The below sudo is for working w/ Colab
 init:
+#docker build -t ${IMAGE} .
 	sudo -Hu docker bash docker-run.sh build -t ${IMAGE} .
 
 get_dataset:
