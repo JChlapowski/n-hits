@@ -120,7 +120,6 @@ def parse_args():
     parser = argparse.ArgumentParser(description=desc)
     parser.add_argument('--hyperopt_max_evals', type=int, help='hyperopt_max_evals')
     parser.add_argument('--experiment_id', default=None, required=False, type=str, help='string to identify experiment')
-    parser.add_argument('--dataset', default=None, required=False, type=str, help='string to identify dataset for individual set testing')
     return parser.parse_args()
 
 if __name__ == '__main__':
@@ -134,37 +133,20 @@ if __name__ == '__main__':
     ILI_horizons = [24, 36, 48, 60]
     datasets = ['ETTm2', 'ECL', 'Exchange', 'traffic', 'weather', 'ili']
 
-    if args.dataset is not None:
-        if args.dataset == 'ili':
+    for dataset in datasets:
+        # Horizon
+        if dataset == 'ili':
             horizons_dataset = ILI_horizons
         else:
             horizons_dataset = horizons
-
         for horizon in horizons_dataset:
-            print(50*'-', args.dataset, 50*'-')
+            print(50*'-', dataset, 50*'-')
             print(50*'-', horizon, 50*'-')
             start = time.time()
+            args.dataset = dataset
             args.horizon = horizon
             main(args)
             print('Time: ', time.time() - start)
-
-    else:
-        
-        for dataset in datasets:
-
-            if dataset == 'ili':
-                horizons_dataset = ILI_horizons
-            else:
-                horizons_dataset = horizons
-
-            for horizon in horizons_dataset:
-                print(50*'-', dataset, 50*'-')
-                print(50*'-', horizon, 50*'-')
-                start = time.time()
-                args.dataset = dataset
-                args.horizon = horizon
-                main(args)
-                print('Time: ', time.time() - start)
 
     main(args)
 
