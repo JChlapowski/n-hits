@@ -136,9 +136,9 @@ class _NHITSBlock(nn.Module):
         activ = getattr(nn, activation)()
 
         if pooling_mode == 'max':
-            self.pooling_layer = nn.Conv1d(1, 1, kernel_size=self.n_pool_kernel_size,
+            self.pooling_layer = nn.MaxPool1d(kernel_size=self.n_pool_kernel_size,
                                               stride=self.n_pool_kernel_size)
-        elif pooling_mode == 'average':
+        elif pooling_mode == 'conv':
             self.pooling_layer = nn.Conv1d(1, 1, kernel_size=self.n_pool_kernel_size,
                                               stride=self.n_pool_kernel_size)
 
