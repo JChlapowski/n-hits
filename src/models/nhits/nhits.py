@@ -115,7 +115,7 @@ class _NHITSBlock(nn.Module):
         """
         super().__init__()
 
-        assert (pooling_mode in ['max','average'])
+        assert (pooling_mode in ['max','conv'])
 
         n_time_in_pooled = int(np.ceil(n_time_in/n_pool_kernel_size))
 
