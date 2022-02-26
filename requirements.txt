@@ -14,4 +14,4 @@ tqdm==4.62.1
 typing_extensions==3.10.0.0
 tf-estimator-nightly==2.8.0.dev2021122109
 folium==0.2.1
-imgaug==0.2.7
+imgaug<0.2.7,>=0.2.5
