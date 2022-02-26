@@ -93,6 +93,8 @@ def init_weights(module, initialization):
             pass #t.nn.init.normal_(module.weight, 0.0, std=1/np.sqrt(module.weight.numel()))
         else:
             assert 1<0, f'Initialization {initialization} not found'
+    elif type(module) == t.nn.Conv1d:
+        t.nn.init.xavier_normal_(module.weight)
 
 # Cell
 ACTIVATIONS = ['ReLU',
