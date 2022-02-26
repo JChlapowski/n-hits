@@ -142,8 +142,7 @@ class _NHITSBlock(nn.Module):
                                               stride=self.n_pool_kernel_size)
         elif pooling_mode == 'conv':
             self.pooling_layer = nn.Sequential(nn.Conv1d(1, 1, kernel_size=self.n_pool_kernel_size, stride=self.n_pool_kernel_size), 
-                                               #nn.BatchNorm1d(num_features=1),
-                                               activ)
+                                               nn.BatchNorm1d(num_features=1))
 
         hidden_layers = []
         for i in range(n_layers):
