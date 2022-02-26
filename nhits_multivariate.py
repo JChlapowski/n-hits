@@ -68,6 +68,8 @@ def main(args):
     X_df = None
     S_df = None
 
+    print(str(args.dataset))
+
     print('Y_df: ', Y_df.head())
     if args.dataset == 'ETTm2':
         len_val = 11520

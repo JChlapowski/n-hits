@@ -463,7 +463,8 @@ def model_fit_predict(mc, S_df, Y_df, X_df, f_cols, ds_in_val, ds_in_test):
                                                     patience=mc['early_stop_patience'],
                                                     verbose=True,
                                                     mode='min')
-        callbacks=[early_stopping]
+        progress_bar = pl.callbacks.progress.TQDMProgressBar(refresh_rate=1)
+        callbacks=[early_stopping, progress_bar]
 
     gpus = -1 if t.cuda.is_available() else 0
     trainer = pl.Trainer(max_epochs=mc['max_epochs'],
@@ -472,7 +473,7 @@ def model_fit_predict(mc, S_df, Y_df, X_df, f_cols, ds_in_val, ds_in_test):
                          progress_bar_refresh_rate=1,
                          gpus=gpus,
                          callbacks=callbacks,
-                         checkpoint_callback=False,
+                         enable_checkpointing=False,
                          logger=False)
     trainer.fit(model, train_loader, val_loader)
 
