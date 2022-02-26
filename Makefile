@@ -1,4 +1,4 @@
-IMAGE := nhits_image.tar
+IMAGE := nhits
 ROOT := $(shell dirname $(realpath $(firstword ${MAKEFILE_LIST})))
 PARENT_ROOT := $(shell dirname ${ROOT})
 PORT := 8888
@@ -14,8 +14,7 @@ ifdef gpu
 endif
 
 init:
-#docker build -t ${IMAGE} .
-	sudo -Hu docker bash docker-run.sh load --input ${IMAGE} .
+	docker build -t ${IMAGE} .
 
 get_dataset:
 	$(MAKE) run_module module="mkdir -p data/"
@@ -23,11 +22,11 @@ get_dataset:
 	$(MAKE) run_module module="unzip data/datasets.zip -d data/"
 
 jupyter:
-	sudo -Hu docker bash docker-run.sh run --cap-add SYS_ADMIN -d --rm ${DOCKER_PARAMETERS} -e HOME=/tmp -p ${PORT}:8888 ${IMAGE} \
+	docker run -d --rm ${DOCKER_PARAMETERS} -e HOME=/tmp -p ${PORT}:8888 ${IMAGE} \
 		bash -c "jupyter lab --ip=0.0.0.0 --no-browser --NotebookApp.token=''"
 
 run_module: .require-module
-	sudo -Hu docker bash docker-run.sh run --cap-add SYS_ADMIN -i --rm ${DOCKER_PARAMETERS} \
+	docker run -i --rm ${DOCKER_PARAMETERS} \
 		${IMAGE} ${module}
 
 bash_docker:
