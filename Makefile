@@ -23,11 +23,11 @@ get_dataset:
 	$(MAKE) run_module module="unzip data/datasets.zip -d data/"
 
 jupyter:
-	docker run -d --rm ${DOCKER_PARAMETERS} -e HOME=/tmp -p ${PORT}:8888 ${IMAGE} \
+	sudo -Hu docker bash docker-run.sh run --cap-add SYS_ADMIN -d --rm ${DOCKER_PARAMETERS} -e HOME=/tmp -p ${PORT}:8888 ${IMAGE} \
 		bash -c "jupyter lab --ip=0.0.0.0 --no-browser --NotebookApp.token=''"
 
 run_module: .require-module
-	docker run -i --rm ${DOCKER_PARAMETERS} \
+	sudo -Hu docker bash docker-run.sh run --cap-add SYS_ADMIN -i --rm ${DOCKER_PARAMETERS} \
 		${IMAGE} ${module}
 
 bash_docker:
