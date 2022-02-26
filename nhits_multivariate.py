@@ -141,7 +141,7 @@ if __name__ == '__main__':
             horizons_dataset = horizons
 
         for horizon in horizons_dataset:
-            print(50*'-', dataset, 50*'-')
+            print(50*'-', args.dataset, 50*'-')
             print(50*'-', horizon, 50*'-')
             start = time.time()
             args.horizon = horizon
@@ -149,6 +149,7 @@ if __name__ == '__main__':
             print('Time: ', time.time() - start)
 
     else:
+        
         for dataset in datasets:
 
             if dataset == 'ili':
