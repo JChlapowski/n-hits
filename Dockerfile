@@ -2,16 +2,16 @@ FROM nvidia/cuda:11.2.0-devel-ubuntu18.04
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-RUN apt-get update  -y --fix-missing && \
-    apt-get install -y --no-install-recommends \
-    software-properties-common \
-    wget \
-    curl \
-    unrar \
-    unzip \
-    git && \
-    apt-get upgrade -y libstdc++6 && \
-    apt-get clean -y
+# RUN apt-get update  -y --fix-missing && \
+#     apt-get install -y --no-install-recommends \
+#     software-properties-common \
+#     wget \
+#     curl \
+#     unrar \
+#     unzip \
+#     git && \
+#     apt-get upgrade -y libstdc++6 && \
+#     apt-get clean -y
 
 RUN add-apt-repository ppa:ubuntu-toolchain-r/test && \
     apt-get update && \
