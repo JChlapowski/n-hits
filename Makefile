@@ -14,7 +14,7 @@ ifdef gpu
 endif
 
 init:
-	docker build -t ${IMAGE} .
+	sudo -Hu docker bash build -t ${IMAGE} .
 
 get_dataset:
 	$(MAKE) run_module module="mkdir -p data/"
