@@ -167,7 +167,6 @@ class _NHITSBlock(nn.Module):
 
         insample_y = insample_y.unsqueeze(1)
         # Pooling layer to downsample input
-        print(insample_y.shape)
 
         insample_y = self.pooling_layer(insample_y)
         insample_y = insample_y.squeeze(1)
