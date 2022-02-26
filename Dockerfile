@@ -22,10 +22,10 @@ ENV DEBIAN_FRONTEND=noninteractive
 #     bash Miniconda3-latest-Linux-x86_64.sh -p /miniconda -b  && \
 #     rm -rf Miniconda3-latest-Linux-x86_64.sh
 
-ENV PATH=/miniconda/bin:${PATH}
-RUN conda update -y conda
+# ENV PATH=/miniconda/bin:${PATH}
+# RUN conda update -y conda
 
-RUN conda install -n base -c conda-forge mamba
+# RUN conda install -n base -c conda-forge mamba
 
 ADD ./environment.yml ./environment.yml
 RUN mamba env update -n base -f ./environment.yml && \
