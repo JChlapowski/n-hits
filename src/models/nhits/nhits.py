@@ -131,6 +131,7 @@ class _NHITSBlock(nn.Module):
         self.n_s_hidden = n_s_hidden
         self.n_x = n_x
         self.n_pool_kernel_size = n_pool_kernel_size
+        self.adjusted_stride = math.ceil(self.n_pool_kernel_size/2)
         self.batch_normalization = batch_normalization
         self.dropout_prob = dropout_prob
 
@@ -144,7 +145,6 @@ class _NHITSBlock(nn.Module):
             if self.n_pool_kernel_size == 1:
                 self.pooling_layer = nn.Conv1d(1, 1, kernel_size=self.n_pool_kernel_size, stride=self.n_pool_kernel_size)
             else:
-                self.adjusted_stride = math.ceil(self.n_pool_kernel_size/2)
                 #print("Stride of conv layer: " + str(self.adjusted_stride))
                 self.pooling_layer = nn.Conv1d(1, 1, kernel_size=self.n_pool_kernel_size, stride=self.adjusted_stride)
 
