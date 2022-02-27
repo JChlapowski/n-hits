@@ -145,20 +145,20 @@ class _NHITSBlock(nn.Module):
                 self.pooling_layer = nn.Conv1d(1, 1, kernel_size=self.n_pool_kernel_size, stride=self.n_pool_kernel_size)
             else:
                 self.adjusted_stride = math.ceil(self.n_pool_kernel_size/2)
-                print("Stride of conv layer: " + str(self.adjusted_stride))
+                #print("Stride of conv layer: " + str(self.adjusted_stride))
                 self.pooling_layer = nn.Conv1d(1, 1, kernel_size=self.n_pool_kernel_size, stride=self.adjusted_stride)
 
         hidden_layers = []
         for i in range(n_layers):
 
-            print("Expected Linear Input size")
+            #print("Expected Linear Input size")
 
             if i == 0:
-                print(n_theta_hidden[i] * 2 - 1)
+                #print(n_theta_hidden[i] * 2 - 1)
                 hidden_layers.append(nn.Linear(in_features=n_theta_hidden[i] * 2 - 1, out_features=n_theta_hidden[i+1]))
                 hidden_layers.append(activ)
             else:
-                print(n_theta_hidden[i])
+                #print(n_theta_hidden[i])
                 hidden_layers.append(nn.Linear(in_features=n_theta_hidden[i], out_features=n_theta_hidden[i+1]))
                 hidden_layers.append(activ)
 
@@ -182,12 +182,12 @@ class _NHITSBlock(nn.Module):
 
         insample_y = insample_y.unsqueeze(1)
         # Pooling layer to downsample input
-        print("Before applying conv pooling")
-        print(insample_y.shape)
+        #print("Before applying conv pooling")
+        #print(insample_y.shape)
         insample_y = self.pooling_layer(insample_y)
         insample_y = insample_y.squeeze(1)
-        print("Post applying conv pooling")
-        print(insample_y.shape)
+        #print("Post applying conv pooling")
+        #print(insample_y.shape)
 
         batch_size = len(insample_y)
         if self.n_x > 0:
@@ -200,8 +200,8 @@ class _NHITSBlock(nn.Module):
             insample_y = t.cat((insample_y, x_s), 1)
 
         # Compute local projection weights and projection
-        print("Post applying static encoding")
-        print(insample_y.shape)
+        #print("Post applying static encoding")
+        #print(insample_y.shape)
         theta = self.layers(insample_y)
         backcast, forecast = self.basis(theta, insample_x_t, outsample_x_t)
 
