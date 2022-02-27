@@ -187,6 +187,8 @@ class _NHITSBlock(nn.Module):
             insample_y = t.cat((insample_y, x_s), 1)
 
         # Compute local projection weights and projection
+        print(insample_y.size)
+        exit()
         theta = self.layers(insample_y)
         backcast, forecast = self.basis(theta, insample_x_t, outsample_x_t)
 
