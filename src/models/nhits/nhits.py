@@ -151,7 +151,7 @@ class _NHITSBlock(nn.Module):
         hidden_layers = []
         for i in range(n_layers):
             print("Expected Linear Input size")
-            print(n_theta_hidden[i] * 2 - 1)
+            print(n_theta_hidden[i])
             hidden_layers.append(nn.Linear(in_features=n_theta_hidden[i], out_features=n_theta_hidden[i+1]))
             hidden_layers.append(activ)
 
