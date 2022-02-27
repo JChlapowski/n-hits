@@ -144,8 +144,8 @@ class _NHITSBlock(nn.Module):
             if self.n_pool_kernel_size == 1:
                 self.pooling_layer = nn.Conv1d(1, 1, kernel_size=self.n_pool_kernel_size, stride=self.n_pool_kernel_size)
             else:
-                adjusted_stride = self.n_pool_kernel_size/2
-                self.pooling_layer = nn.Conv1d(1, 1, kernel_size=self.n_pool_kernel_size, stride=self.adjusted_stride/2)
+                self.adjusted_stride = self.n_pool_kernel_size/2
+                self.pooling_layer = nn.Conv1d(1, 1, kernel_size=self.n_pool_kernel_size, stride=self.adjusted_stride)
 
         hidden_layers = []
         for i in range(n_layers):
