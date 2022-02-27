@@ -168,7 +168,7 @@ class _NHITSBlock(nn.Module):
             if self.dropout_prob>0:
                 hidden_layers.append(nn.Dropout(p=self.dropout_prob))
 
-        output_layer = [nn.Linear(in_features=n_theta_hidden[-1], out_features=n_theta)]
+        output_layer = [nn.Linear(in_features=n_theta_hidden[-1] * 2 - 1, out_features=n_theta)]
         layers = hidden_layers + output_layer
 
         # n_s is computed with data, n_s_hidden is provided by user, if 0 no statics are used
