@@ -149,6 +149,7 @@ class _NHITSBlock(nn.Module):
 
         hidden_layers = []
         for i in range(n_layers):
+            print(n_theta_hidden[i])
             hidden_layers.append(nn.Linear(in_features=n_theta_hidden[i], out_features=n_theta_hidden[i+1]))
             hidden_layers.append(activ)
 
@@ -172,7 +173,7 @@ class _NHITSBlock(nn.Module):
 
         insample_y = insample_y.unsqueeze(1)
         # Pooling layer to downsample input
-
+        print(insample_y.shape)
         insample_y = self.pooling_layer(insample_y)
         insample_y = insample_y.squeeze(1)
 
@@ -188,6 +189,7 @@ class _NHITSBlock(nn.Module):
 
         # Compute local projection weights and projection
         theta = self.layers(insample_y)
+        exit()
         backcast, forecast = self.basis(theta, insample_x_t, outsample_x_t)
 
         return backcast, forecast
