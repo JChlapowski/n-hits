@@ -145,12 +145,13 @@ class _NHITSBlock(nn.Module):
                 self.pooling_layer = nn.Conv1d(1, 1, kernel_size=self.n_pool_kernel_size, stride=self.n_pool_kernel_size)
             else:
                 self.adjusted_stride = math.ceil(self.n_pool_kernel_size/2)
+                print("Stride of conv layer: " + str(self.adjusted_stride))
                 self.pooling_layer = nn.Conv1d(1, 1, kernel_size=self.n_pool_kernel_size, stride=self.adjusted_stride)
 
         hidden_layers = []
         for i in range(n_layers):
             print("Expected Linear Input size")
-            print(n_theta_hidden[i])
+            print(n_theta_hidden[i] * 2 - 1)
             hidden_layers.append(nn.Linear(in_features=n_theta_hidden[i], out_features=n_theta_hidden[i+1]))
             hidden_layers.append(activ)
 
@@ -180,7 +181,6 @@ class _NHITSBlock(nn.Module):
         insample_y = insample_y.squeeze(1)
         print("Post applying conv pooling")
         print(insample_y.shape)
-
 
         batch_size = len(insample_y)
         if self.n_x > 0:
