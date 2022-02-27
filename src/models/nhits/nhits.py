@@ -135,7 +135,7 @@ class _NHITSBlock(nn.Module):
         if self.n_pool_kernel_size == 1:
             self.adjusted_stride = 1
         else:
-            self.adjusted_stride = math.floor(self.n_pool_kernel_size/2)
+            self.adjusted_stride = math.ceil(self.n_pool_kernel_size/2)
     
         self.batch_normalization = batch_normalization
         self.dropout_prob = dropout_prob
@@ -160,7 +160,7 @@ class _NHITSBlock(nn.Module):
                     hidden_layers.append(nn.Linear(in_features=n_theta_hidden[i], out_features=n_theta_hidden[i+1]))
                     hidden_layers.append(activ)
                 else:
-                    hidden_layers.append(nn.Linear(in_features=n_theta_hidden[i] * 2 * self.adjusted_stride - 1, out_features=n_theta_hidden[i+1]))
+                    hidden_layers.append(nn.Linear(in_features=n_theta_hidden[i] * self.adjusted_stride - 1, out_features=n_theta_hidden[i+1]))
                     hidden_layers.append(activ)
                 
             else:
