@@ -160,7 +160,7 @@ class _NHITSBlock(nn.Module):
                     hidden_layers.append(nn.Linear(in_features=n_theta_hidden[i], out_features=n_theta_hidden[i+1]))
                     hidden_layers.append(activ)
                 else:
-                    hidden_layers.append(nn.Linear(in_features=n_theta_hidden[i] * self.adjusted_stride - 1, out_features=n_theta_hidden[i+1]))
+                    hidden_layers.append(nn.Linear(in_features=n_theta_hidden[i] * 2 * self.adjusted_stride - 1, out_features=n_theta_hidden[i+1]))
                     hidden_layers.append(activ)
                 
             else:
