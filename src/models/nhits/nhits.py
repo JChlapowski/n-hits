@@ -196,7 +196,6 @@ class _NHITSBlock(nn.Module):
         print("Post applying static encoding")
         print(insample_y.shape)
         theta = self.layers(insample_y)
-        exit()
         backcast, forecast = self.basis(theta, insample_x_t, outsample_x_t)
 
         return backcast, forecast
