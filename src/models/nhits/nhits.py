@@ -155,7 +155,7 @@ class _NHITSBlock(nn.Module):
 
             if i == 0:
                 #print(n_theta_hidden[i] * 2 - 1)
-                hidden_layers.append(nn.Linear(in_features=n_theta_hidden[i] * 2 - 1, out_features=n_theta_hidden[i+1]))
+                hidden_layers.append(nn.Linear(in_features=n_theta_hidden[i] * self.adjusted_stride - 1, out_features=n_theta_hidden[i+1]))
                 hidden_layers.append(activ)
             else:
                 #print(n_theta_hidden[i])
