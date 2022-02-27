@@ -149,6 +149,7 @@ class _NHITSBlock(nn.Module):
 
         hidden_layers = []
         for i in range(n_layers):
+            print("Expected Linear Input size")
             print(n_theta_hidden[i])
             hidden_layers.append(nn.Linear(in_features=n_theta_hidden[i], out_features=n_theta_hidden[i+1]))
             hidden_layers.append(activ)
@@ -173,9 +174,13 @@ class _NHITSBlock(nn.Module):
 
         insample_y = insample_y.unsqueeze(1)
         # Pooling layer to downsample input
+        print("Before applying conv pooling")
         print(insample_y.shape)
         insample_y = self.pooling_layer(insample_y)
         insample_y = insample_y.squeeze(1)
+        print("Post applying conv pooling")
+        print(insample_y.shape)
+
 
         batch_size = len(insample_y)
         if self.n_x > 0:
@@ -188,6 +193,8 @@ class _NHITSBlock(nn.Module):
             insample_y = t.cat((insample_y, x_s), 1)
 
         # Compute local projection weights and projection
+        print("Post applying static encoding")
+        print(insample_y.shape)
         theta = self.layers(insample_y)
         exit()
         backcast, forecast = self.basis(theta, insample_x_t, outsample_x_t)
