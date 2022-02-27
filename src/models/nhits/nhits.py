@@ -131,7 +131,7 @@ class _NHITSBlock(nn.Module):
         self.n_s_hidden = n_s_hidden
         self.n_x = n_x
         self.n_pool_kernel_size = n_pool_kernel_size
-        self.adjusted_stride = math.ceil(self.n_pool_kernel_size/2)
+        self.adjusted_stride = math.floor(self.n_pool_kernel_size/2)
         self.batch_normalization = batch_normalization
         self.dropout_prob = dropout_prob
 
