@@ -151,7 +151,7 @@ class _NHITSBlock(nn.Module):
                 self.pooling_layers.append(nn.Conv1d(1, 1, kernel_size=self.n_pool_kernel_size, stride=stride))
                 self.pooling_layers.append(activ)
                 print(prev)
-                prev = math.floor((prev - self.n_pool_kernel_size)/stride + 1)
+                prev = math.ceil((prev - self.n_pool_kernel_size)/stride + 1)
                 self.convDim = prev
                 stride *= 2
             
