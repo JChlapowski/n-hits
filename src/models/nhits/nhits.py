@@ -152,6 +152,8 @@ class _NHITSBlock(nn.Module):
                 i+=1
                 self.stride = 2**i
 
+        print(len(self.pooling_layers))
+        exit()
         self.pooling_layer = nn.Sequential(*self.pooling_layers)
 
         hidden_layers = []
