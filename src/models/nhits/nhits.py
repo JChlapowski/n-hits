@@ -153,7 +153,7 @@ class _NHITSBlock(nn.Module):
                 print(prev)
                 prev = math.floor((prev - self.n_pool_kernel_size)/stride + 1)
                 self.convDim = prev
-                stride += 1
+                stride *= 2
 
         self.pooling_layer = nn.Sequential(*self.pooling_layers)
 
