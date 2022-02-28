@@ -146,7 +146,7 @@ class _NHITSBlock(nn.Module):
             self.pooling_layers = []
             stride = 1
             prev = n_theta
-            while math.floor((prev - self.n_pool_kernel_size)/stride + 1) > n_theta_hidden[0]:
+            while math.floor((prev - self.n_pool_kernel_size)/stride + 1) >= n_theta_hidden[0]:
                 #print((n_theta_hidden[0] + self.stride - self.n_pool_kernel_size) * self.n_pool_kernel_size)
                 self.pooling_layers.append(nn.Conv1d(1, 1, kernel_size=self.n_pool_kernel_size, stride=stride))
                 self.pooling_layers.append(activ)
@@ -155,6 +155,8 @@ class _NHITSBlock(nn.Module):
                 self.convDim = prev
                 stride *= 2
             
+            self.convDim = 
+
             self.pooling_layer = nn.Sequential(*self.pooling_layers)
 
         hidden_layers = []
