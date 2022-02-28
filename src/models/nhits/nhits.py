@@ -131,6 +131,7 @@ class _NHITSBlock(nn.Module):
         self.n_s_hidden = n_s_hidden
         self.n_x = n_x
         self.n_pool_kernel_size = n_pool_kernel_size
+        self.convDim = 0
     
         self.batch_normalization = batch_normalization
         self.dropout_prob = dropout_prob
@@ -151,15 +152,20 @@ class _NHITSBlock(nn.Module):
                 self.pooling_layers.append(activ)
                 print(prev)
                 prev = math.floor((prev - self.n_pool_kernel_size)/stride) + 1
+                self.convDim = prev
                 stride += 1
 
         self.pooling_layer = nn.Sequential(*self.pooling_layers)
 
         hidden_layers = []
         for i in range(n_layers):
-
-            hidden_layers.append(nn.Linear(in_features=n_theta_hidden[i], out_features=n_theta_hidden[i+1]))
-            hidden_layers.append(activ)
+            
+            if i == 0 and self.convDim != 0:
+                hidden_layers.append(nn.Linear(in_features=self.convDim, out_features=n_theta_hidden[i+1]))
+                hidden_layers.append(activ)
+            else:
+                hidden_layers.append(nn.Linear(in_features=n_theta_hidden[i], out_features=n_theta_hidden[i+1]))
+                hidden_layers.append(activ)
 
             if self.batch_normalization:
                 hidden_layers.append(nn.BatchNorm1d(num_features=n_theta_hidden[i+1]))
