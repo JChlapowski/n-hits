@@ -144,13 +144,12 @@ class _NHITSBlock(nn.Module):
         elif pooling_mode == 'conv':
             self.pooling_layers = []
             i = 0
-            self.divisor = 0
-            while self.divisor * (2**i) <= self.n_pool_kernel_size:
-                self.divisor = 2**i
-                print(self.divisor)
-                self.pooling_layers.append(nn.Conv1d(1, 1, kernel_size=self.n_pool_kernel_size, stride=math.ceil(self.n_pool_kernel_size/self.divisor)))
+            self.stride = (2**i)
+            while self.stride <= self.n_pool_kernel_size:
+                self.pooling_layers.append(nn.Conv1d(1, 1, kernel_size=self.n_pool_kernel_size, stride=self.stride))
                 self.pooling_layers.append(activ)
                 i+=1
+                self.stride = 2**i
 
         self.pooling_layer = nn.Sequential(*self.pooling_layers)
 
