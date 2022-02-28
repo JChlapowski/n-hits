@@ -145,7 +145,7 @@ class _NHITSBlock(nn.Module):
             self.pooling_layers = []
             i = 0
             self.stride = (2**i)
-            while self.stride <= self.n_pool_kernel_size:
+            while n_theta_hidden[0] * self.n_pool_kernel_size - self.stride - self.n_pool_kernel_size >= n_theta_hidden[0]:
                 self.pooling_layers.append(nn.Conv1d(1, 1, kernel_size=self.n_pool_kernel_size, stride=self.stride))
                 self.pooling_layers.append(activ)
                 i+=1
