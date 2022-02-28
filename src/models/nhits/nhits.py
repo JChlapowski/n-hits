@@ -134,6 +134,8 @@ class _NHITSBlock(nn.Module):
     
         self.batch_normalization = batch_normalization
         self.dropout_prob = dropout_prob
+        
+        print(n_theta_hidden[0])
 
         assert activation in ACTIVATIONS, f'{activation} is not in {ACTIVATIONS}'
         activ = getattr(nn, activation)()
