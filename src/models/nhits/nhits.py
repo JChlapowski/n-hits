@@ -155,7 +155,7 @@ class _NHITSBlock(nn.Module):
                 self.convDim = prev
                 stride *= 2
             
-            self.convDim -= len(self.pooling_layers)
+            self.convDim += 2**len(self.pooling_layers)
             self.pooling_layer = nn.Sequential(*self.pooling_layers)
 
         hidden_layers = []
