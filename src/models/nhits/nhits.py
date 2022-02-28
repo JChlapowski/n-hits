@@ -147,6 +147,7 @@ class _NHITSBlock(nn.Module):
             self.divisor = 0
             while self.divisor * (2**i) <= self.n_pool_kernel_size:
                 self.divisor = 2**i
+                print(self.divisor)
                 self.pooling_layers.append(nn.Conv1d(1, 1, kernel_size=self.n_pool_kernel_size, stride=math.ceil(self.n_pool_kernel_size/self.divisor)))
                 self.pooling_layers.append(activ)
                 i+=1
