@@ -161,7 +161,7 @@ class _NHITSBlock(nn.Module):
         for i in range(n_layers):
             
             if i == 0 and self.convDim != 0:
-                hidden_layers.append(nn.Linear(in_features=self.convDim - 1, out_features=n_theta_hidden[i+1]))
+                hidden_layers.append(nn.Linear(in_features=self.convDim, out_features=n_theta_hidden[i+1]))
                 hidden_layers.append(activ)
             else:
                 hidden_layers.append(nn.Linear(in_features=n_theta_hidden[i], out_features=n_theta_hidden[i+1]))
