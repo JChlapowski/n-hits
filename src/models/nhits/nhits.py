@@ -150,6 +150,8 @@ class _NHITSBlock(nn.Module):
                 self.pooling_layers.append(nn.Conv1d(1, 1, kernel_size=self.n_pool_kernel_size, stride=self.n_pool_kernel_size/self.divisor))
                 self.pooling_layers.append(activ)
 
+        self.pooling_layer = nn.Sequential(*self.pooling_layers)
+
         hidden_layers = []
         for i in range(n_layers):
 
