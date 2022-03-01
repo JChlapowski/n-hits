@@ -131,7 +131,11 @@ class _NHITSBlock(nn.Module):
         self.n_s_hidden = n_s_hidden
         self.n_x = n_x
         self.n_pool_kernel_size = n_pool_kernel_size
-        self.convDim = 0
+        
+        if self.n_pool_kernel_size == 1:
+            self.adjusted_stride = 1
+        else:
+            self.adjusted_stride = math.ceil(self.n_pool_kernel_size/2)
     
         self.batch_normalization = batch_normalization
         self.dropout_prob = dropout_prob
@@ -143,29 +147,15 @@ class _NHITSBlock(nn.Module):
             self.pooling_layer = nn.MaxPool1d(kernel_size=self.n_pool_kernel_size,
                                               stride=self.n_pool_kernel_size)
         elif pooling_mode == 'conv':
-            self.pooling_layers = []
-            stride = 1
-            prev = n_theta
-            while math.floor((prev - self.n_pool_kernel_size)/stride + 1) >= n_theta_hidden[0]:
-                #print((n_theta_hidden[0] + self.stride - self.n_pool_kernel_size) * self.n_pool_kernel_size)
-                self.pooling_layers.append(nn.Conv1d(1, 1, kernel_size=self.n_pool_kernel_size, stride=stride))
-                self.pooling_layers.append(activ)
-                print(prev)
-                prev = math.floor((prev - self.n_pool_kernel_size)/stride + 1)
-                self.convDim = prev
-                stride *= 2
+            self.pooling_layer = nn.Sequential(nn.Conv1d(1, 1, kernel_size=self.n_pool_kernel_size, stride=self.adjusted_stride),
+                                               nn.MaxPool1d(kernel_size=self.n_pool_kernel_size, stride=self.adjusted_stride),
+                                               activ)
             
-            self.pooling_layer = nn.Sequential(*self.pooling_layers)
-
         hidden_layers = []
         for i in range(n_layers):
-            
-            if i == 0 and self.convDim != 0:
-                hidden_layers.append(nn.Linear(in_features=self.convDim - len(self.pooling_layers), out_features=n_theta_hidden[i+1]))
-                hidden_layers.append(activ)
-            else:
-                hidden_layers.append(nn.Linear(in_features=n_theta_hidden[i], out_features=n_theta_hidden[i+1]))
-                hidden_layers.append(activ)
+        
+            hidden_layers.append(nn.Linear(in_features=n_theta_hidden[i], out_features=n_theta_hidden[i+1]))
+            hidden_layers.append(activ)
 
             if self.batch_normalization:
                 hidden_layers.append(nn.BatchNorm1d(num_features=n_theta_hidden[i+1]))
