@@ -131,11 +131,6 @@ class _NHITSBlock(nn.Module):
         self.n_s_hidden = n_s_hidden
         self.n_x = n_x
         self.n_pool_kernel_size = n_pool_kernel_size
-        
-        if self.n_pool_kernel_size == 1:
-            self.adjusted_stride = 1
-        else:
-            self.adjusted_stride = math.ceil(self.n_pool_kernel_size/2)
     
         self.batch_normalization = batch_normalization
         self.dropout_prob = dropout_prob
@@ -147,8 +142,7 @@ class _NHITSBlock(nn.Module):
             self.pooling_layer = nn.MaxPool1d(kernel_size=self.n_pool_kernel_size,
                                               stride=self.n_pool_kernel_size)
         elif pooling_mode == 'conv':
-            self.pooling_layer = nn.Sequential(nn.Conv1d(1, 1, kernel_size=self.n_pool_kernel_size, stride=self.adjusted_stride),
-                                               nn.MaxPool1d(kernel_size=self.n_pool_kernel_size, stride=self.adjusted_stride),
+            self.pooling_layer = nn.Sequential(nn.Conv1d(1, 1, kernel_size=self.n_pool_kernel_size, stride=self.n_pool_kernel_size),
                                                activ)
             
         hidden_layers = []

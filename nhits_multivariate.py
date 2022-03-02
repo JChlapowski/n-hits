@@ -33,7 +33,7 @@ def get_experiment_space(args):
             'interpolation_mode': hp.choice('interpolation_mode', ['linear']),
             # Regularization and optimization parameters
             'batch_normalization': hp.choice('batch_normalization', [False]),
-            'dropout_prob_theta': hp.choice('dropout_prob_theta', [ 0 ]),
+            'dropout_prob_theta': hp.choice('dropout_prob_theta', [ 0, 0.5 ]),
             'dropout_prob_exogenous': hp.choice('dropout_prob_exogenous', [0]),
             'learning_rate': hp.choice('learning_rate', [0.001]),
             'lr_decay': hp.choice('lr_decay', [0.5] ),
