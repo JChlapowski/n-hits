@@ -28,6 +28,18 @@ class _StaticFeaturesEncoder(nn.Module):
         x = self.encoder(x)
         return x
 
+class _DownsampleFeaturesEncoder(nn.Module):
+    def __init__(self, in_features, out_features):
+        super(_StaticFeaturesEncoder, self).__init__()
+        layers = [nn.Dropout(p=0.5),
+                  nn.Linear(in_features=in_features, out_features=out_features),
+                  nn.ReLU()]
+        self.encoder = nn.Sequential(*layers)
+
+    def forward(self, x):
+        x = self.encoder(x)
+        return x
+
 class _sEncoder(nn.Module):
     def __init__(self, in_features, out_features, n_time_in):
         super(_sEncoder, self).__init__()
@@ -143,7 +155,7 @@ class _NHITSBlock(nn.Module):
                                               stride=self.n_pool_kernel_size)
         elif pooling_mode == 'conv':
             self.pooling_layer = nn.Sequential(nn.Conv1d(1, 1, kernel_size=self.n_pool_kernel_size, stride=self.n_pool_kernel_size),
-                                               activ)
+                                               nn.LeakyReLU(0.2, inplace=True))
             
         hidden_layers = []
         for i in range(n_layers):
