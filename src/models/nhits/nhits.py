@@ -176,7 +176,9 @@ class _NHITSBlock(nn.Module):
         output_layer = nn.Sequential(nn.Conv1d(1, 1, kernel_size=self.n_pool_kernel_size, stride=self.n_pool_kernel_size),
                                             nn.PReLU())
 
-        layers = hidden_layers + output_layer
+        layers = hidden_layers
+
+        layers.append(output_layer)
 
         # n_s is computed with data, n_s_hidden is provided by user, if 0 no statics are used
         if (self.n_s > 0) and (self.n_s_hidden > 0):
