@@ -31,7 +31,7 @@ class _StaticFeaturesEncoder(nn.Module):
 class _DownsampleFeaturesEncoder(nn.Module):
     def __init__(self, in_features, out_features):
         super(_StaticFeaturesEncoder, self).__init__()
-        layers = [nn.Dropout(p=0.5),
+        layers = [nn.Dropout(p=0.2),
                   nn.Linear(in_features=in_features, out_features=out_features),
                   nn.ReLU()]
         self.encoder = nn.Sequential(*layers)
@@ -106,7 +106,9 @@ def init_weights(module, initialization):
         else:
             assert 1<0, f'Initialization {initialization} not found'
     elif type(module) == t.nn.Conv1d:
-        t.nn.init.xavier_normal_(module.weight)
+        t.nn.init.kaiming_normal_(module.weight)
+    elif type(module) == t.nn.PReLU:
+        t.nn.init.kaiming_normal_(module.weight)
 
 # Cell
 ACTIVATIONS = ['ReLU',
@@ -155,7 +157,7 @@ class _NHITSBlock(nn.Module):
                                               stride=self.n_pool_kernel_size)
         elif pooling_mode == 'conv':
             self.pooling_layer = nn.Sequential(nn.Conv1d(1, 1, kernel_size=self.n_pool_kernel_size, stride=self.n_pool_kernel_size),
-                                               nn.LeakyReLU(0.2, inplace=True))
+                                               nn.PReLU())
             
         hidden_layers = []
         for i in range(n_layers):
