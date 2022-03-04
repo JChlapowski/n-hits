@@ -124,7 +124,8 @@ class _NHITSBlock(nn.Module):
     N-HiTS block which takes a basis function as an argument.
     """
     def __init__(self, n_time_in: int, n_time_out: int, n_x: int,
-                 n_s: int, n_s_hidden: int, n_theta: int, n_theta_hidden: list,
+                 n_s: int, n_s_hidden: int, #n_theta: int, 
+                 n_theta_hidden: list,
                  n_pool_kernel_size: int, pooling_mode: str, basis: nn.Module,
                  n_layers: int,  batch_normalization: bool, dropout_prob: float, activation: str):
         """
@@ -155,6 +156,7 @@ class _NHITSBlock(nn.Module):
         if pooling_mode == 'max':
             self.pooling_layer = nn.MaxPool1d(kernel_size=self.n_pool_kernel_size,
                                               stride=self.n_pool_kernel_size)
+
         elif pooling_mode == 'conv':
             self.pooling_layer = nn.Sequential(nn.Conv1d(1, 1, kernel_size=self.n_pool_kernel_size, stride=self.n_pool_kernel_size),
                                                nn.PReLU())
@@ -171,7 +173,9 @@ class _NHITSBlock(nn.Module):
             if self.dropout_prob>0:
                 hidden_layers.append(nn.Dropout(p=self.dropout_prob))
 
-        output_layer = [nn.Linear(in_features=n_theta_hidden[-1], out_features=n_theta)]
+        output_layer = nn.Sequential(nn.Conv1d(1, 1, kernel_size=self.n_pool_kernel_size, stride=self.n_pool_kernel_size),
+                                            nn.PReLU())
+
         layers = hidden_layers + output_layer
 
         # n_s is computed with data, n_s_hidden is provided by user, if 0 no statics are used
@@ -284,7 +288,7 @@ class _NHITS(nn.Module):
                     nbeats_block = block_list[-1]
                 else:
                     if stack_types[i] == 'identity':
-                        n_theta = (n_time_in + max(n_time_out//n_freq_downsample[i], 1) )
+                        #n_theta = (n_time_in + max(n_time_out//n_freq_downsample[i], 1) )
                         basis = IdentityBasis(backcast_size=n_time_in,
                                               forecast_size=n_time_out,
                                               interpolation_mode=interpolation_mode)
@@ -297,7 +301,7 @@ class _NHITS(nn.Module):
                                                    n_x=n_x,
                                                    n_s=n_s,
                                                    n_s_hidden=n_s_hidden,
-                                                   n_theta=n_theta,
+                                                   #n_theta=n_theta,
                                                    n_theta_hidden=n_theta_hidden[i],
                                                    n_pool_kernel_size=n_pool_kernel_size[i],
                                                    pooling_mode=pooling_mode,
