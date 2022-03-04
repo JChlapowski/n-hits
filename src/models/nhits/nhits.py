@@ -231,7 +231,7 @@ class _NHITS(nn.Module):
                  n_layers: list,
                  n_theta_hidden: list,
                  n_pool_kernel_size: list,
-                 n_freq_downsample: list,
+                 #n_freq_downsample: list,
                  pooling_mode,
                  interpolation_mode,
                  dropout_prob_theta,
@@ -254,7 +254,7 @@ class _NHITS(nn.Module):
                                    n_layers=n_layers,
                                    n_theta_hidden=n_theta_hidden,
                                    n_pool_kernel_size=n_pool_kernel_size,
-                                   n_freq_downsample=n_freq_downsample,
+                                   #n_freq_downsample=n_freq_downsample,
                                    pooling_mode=pooling_mode,
                                    interpolation_mode=interpolation_mode,
                                    batch_normalization=batch_normalization,
@@ -268,7 +268,8 @@ class _NHITS(nn.Module):
                      n_time_in, n_time_out,
                      n_x, n_x_hidden, n_s, n_s_hidden,
                      n_layers, n_theta_hidden,
-                     n_pool_kernel_size, n_freq_downsample, pooling_mode, interpolation_mode,
+                     n_pool_kernel_size, #n_freq_downsample, 
+                     pooling_mode, interpolation_mode,
                      batch_normalization, dropout_prob_theta,
                      activation, shared_weights, initialization):
 
@@ -407,7 +408,7 @@ class NHITS(pl.LightningModule):
                  n_layers,
                  n_theta_hidden,
                  n_pool_kernel_size,
-                 n_freq_downsample,
+                 #n_freq_downsample,
                  pooling_mode,
                  interpolation_mode,
                  batch_normalization,
@@ -509,7 +510,7 @@ class NHITS(pl.LightningModule):
         self.n_layers = n_layers
         self.n_theta_hidden = n_theta_hidden
         self.n_pool_kernel_size = n_pool_kernel_size
-        self.n_freq_downsample = n_freq_downsample
+        #self.n_freq_downsample = n_freq_downsample
         self.pooling_mode = pooling_mode
         self.interpolation_mode = interpolation_mode
 
@@ -547,7 +548,7 @@ class NHITS(pl.LightningModule):
                              n_layers=self.n_layers,
                              n_theta_hidden=self.n_theta_hidden,
                              n_pool_kernel_size=self.n_pool_kernel_size,
-                             n_freq_downsample=self.n_freq_downsample,
+                             #n_freq_downsample=self.n_freq_downsample,
                              pooling_mode=self.pooling_mode,
                              interpolation_mode=self.interpolation_mode,
                              dropout_prob_theta=self.dropout_prob_theta,
