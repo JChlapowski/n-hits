@@ -213,7 +213,7 @@ class _NHITSBlock(nn.Module):
 
         theta = self.output_layer(hidden_theta.unsqueeze(1))
 
-        theta = theta.squeeze(1)
+        #theta = theta.squeeze(1)
 
         print(theta.shape)
 
