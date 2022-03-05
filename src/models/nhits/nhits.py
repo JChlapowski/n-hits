@@ -173,12 +173,10 @@ class _NHITSBlock(nn.Module):
             if self.dropout_prob>0:
                 hidden_layers.append(nn.Dropout(p=self.dropout_prob))
 
-        output_layer = nn.Sequential(nn.Conv1d(1, 1, kernel_size=self.n_pool_kernel_size, stride=self.n_pool_kernel_size),
-                                            nn.ReLU())
+        self.output_layer = nn.Sequential(nn.Conv1d(1, 1, kernel_size=self.n_pool_kernel_size, stride=self.n_pool_kernel_size),
+                                    nn.ReLU())
 
         layers = hidden_layers
-
-        layers.append(output_layer)
 
         # n_s is computed with data, n_s_hidden is provided by user, if 0 no statics are used
         if (self.n_s > 0) and (self.n_s_hidden > 0):
@@ -211,7 +209,12 @@ class _NHITSBlock(nn.Module):
         # Compute local projection weights and projection
         #print("Post applying static encoding")
         #print(insample_y.shape)
-        theta = self.layers(insample_y)
+        hidden_theta = self.layers(insample_y)
+
+        theta = self.output_layer(hidden_theta.unsqueeze(2))
+
+        theta = theta.squeeze(1)
+
         backcast, forecast = self.basis(theta, insample_x_t, outsample_x_t)
 
         return backcast, forecast
