@@ -174,7 +174,7 @@ class _NHITSBlock(nn.Module):
                 hidden_layers.append(nn.Dropout(p=self.dropout_prob))
 
         output_layer = nn.Sequential(nn.Conv1d(1, 1, kernel_size=self.n_pool_kernel_size, stride=self.n_pool_kernel_size),
-                                            nn.PReLU())
+                                            nn.ReLU())
 
         layers = hidden_layers
 
