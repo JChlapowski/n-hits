@@ -211,13 +211,13 @@ class _NHITSBlock(nn.Module):
         #print(insample_y.shape)
         hidden_theta = self.layers(insample_y)
 
-        print(hidden_theta)
+        print(hidden_theta.unsqueeze(1))
 
         theta = self.output_layer(hidden_theta.unsqueeze(1))
 
-        theta = theta.squeeze(1)
+        #theta = theta.squeeze(1)
 
-        #print(theta)
+        print(theta)
 
         backcast, forecast = self.basis(theta, insample_x_t, outsample_x_t)
 
