@@ -215,6 +215,8 @@ class _NHITSBlock(nn.Module):
 
         theta = theta.squeeze(1)
 
+        print(theta.shape)
+
         backcast, forecast = self.basis(theta, insample_x_t, outsample_x_t)
 
         return backcast, forecast
