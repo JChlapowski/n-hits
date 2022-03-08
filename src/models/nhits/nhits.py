@@ -28,18 +28,6 @@ class _StaticFeaturesEncoder(nn.Module):
         x = self.encoder(x)
         return x
 
-class _DownsampleFeaturesEncoder(nn.Module):
-    def __init__(self, in_features, out_features):
-        super(_StaticFeaturesEncoder, self).__init__()
-        layers = [nn.Dropout(p=0.2),
-                  nn.Linear(in_features=in_features, out_features=out_features),
-                  nn.ReLU()]
-        self.encoder = nn.Sequential(*layers)
-
-    def forward(self, x):
-        x = self.encoder(x)
-        return x
-
 class _sEncoder(nn.Module):
     def __init__(self, in_features, out_features, n_time_in):
         super(_sEncoder, self).__init__()
@@ -106,9 +94,7 @@ def init_weights(module, initialization):
         else:
             assert 1<0, f'Initialization {initialization} not found'
     elif type(module) == t.nn.Conv1d:
-        t.nn.init.kaiming_normal_(module.weight)
-    elif type(module) == t.nn.PReLU:
-        t.nn.init.kaiming_normal_(module.weight)
+        t.nn.init.xavier_normal_(module.weight)
 
 # Cell
 ACTIVATIONS = ['ReLU',
@@ -124,9 +110,8 @@ class _NHITSBlock(nn.Module):
     N-HiTS block which takes a basis function as an argument.
     """
     def __init__(self, n_time_in: int, n_time_out: int, n_x: int,
-                 n_s: int, n_s_hidden: int, #n_theta: int, 
-                 n_theta_hidden: list,
-                 n_pool_kernel_size: int, pooling_mode: str, basis: nn.Module,
+                 n_s: int, n_s_hidden: int, n_theta: int, n_theta_hidden: list,
+                 n_pool_kernel_size: int, pooling_mode: str, layer_mode: str, basis: nn.Module,
                  n_layers: int,  batch_normalization: bool, dropout_prob: float, activation: str):
         """
         """
@@ -156,27 +141,70 @@ class _NHITSBlock(nn.Module):
         if pooling_mode == 'max':
             self.pooling_layer = nn.MaxPool1d(kernel_size=self.n_pool_kernel_size,
                                               stride=self.n_pool_kernel_size)
-
         elif pooling_mode == 'conv':
-            self.pooling_layer = nn.Sequential(nn.Conv1d(1, 1, kernel_size=self.n_pool_kernel_size, stride=self.n_pool_kernel_size),
-                                               nn.PReLU())
+            self.pooling_layer = nn.Sequential(nn.Conv1d(1, 1, kernel_size=self.n_pool_kernel_size, stride=self.n_pool_kernel_size))
             
         hidden_layers = []
         for i in range(n_layers):
+            
+            if layer_mode == 'conv' and n_theta_hidden[i] > n_theta_hidden[i+1]:
+
+                if math.floor(n_theta_hidden[i]/n_theta_hidden[i+1]) > 2:
+                    kernel = math.floor(n_theta_hidden[i]/n_theta_hidden[i+1])
+                    stride = kernel
+
+                    hidden_layers.append(nn.Conv1d(1, 1, kernel_size=kernel, stride=stride))
+                    hidden_layers.append(activ)
+
+                    if self.batch_normalization:
+                        hidden_layers.append(nn.BatchNorm1d(num_features=n_theta_hidden[i+1]))
+
+                    if self.dropout_prob>0:
+                        hidden_layers.append(nn.Dropout(p=self.dropout_prob))
+                else:
+                    stride = 1
+                    kernel = math.floor(n_theta_hidden[i] - n_theta_hidden[i+1]) + 1
+
+                    hidden_layers.append(nn.Conv1d(1, 1, kernel_size=kernel, stride=stride))
+                    hidden_layers.append(activ)
+
+            else:
+                hidden_layers.append(nn.Linear(in_features=n_theta_hidden[i], out_features=n_theta_hidden[i+1]))
+                hidden_layers.append(activ)
+
+                if self.batch_normalization:
+                    hidden_layers.append(nn.BatchNorm1d(num_features=n_theta_hidden[i+1]))
+
+                if self.dropout_prob>0:
+                    hidden_layers.append(nn.Dropout(p=self.dropout_prob))
+
+            
+        if layer_mode == 'linear':
+
+            self.output_layer = [nn.Linear(in_features=n_theta_hidden[-1], out_features=n_theta)]
         
-            hidden_layers.append(nn.Linear(in_features=n_theta_hidden[i], out_features=n_theta_hidden[i+1]))
-            hidden_layers.append(activ)
+        elif layer_mode == 'conv':
 
-            if self.batch_normalization:
-                hidden_layers.append(nn.BatchNorm1d(num_features=n_theta_hidden[i+1]))
+            if n_theta_hidden[-1] > n_theta:
 
-            if self.dropout_prob>0:
-                hidden_layers.append(nn.Dropout(p=self.dropout_prob))
+                if math.floor(n_theta_hidden[-1]/n_theta) > 2:
 
-        self.output_layer = nn.Sequential(nn.Conv1d(1, 1, kernel_size=self.n_pool_kernel_size, stride=self.n_pool_kernel_size),
-                                    nn.LeakyReLU(0.2, inplace=True))
+                    kernel = math.floor(n_theta_hidden[-1]/n_theta)
+                    stride = kernel
 
-        layers = hidden_layers
+                    self.output_layer = [nn.Conv1d(1, 1, kernel_size=kernel, stride=stride)]
+
+                else:
+
+                    stride = 1
+                    kernel = math.floor(n_theta_hidden[-1] - n_theta) + 1
+
+                    self.output_layer = [nn.Conv1d(1, 1, kernel_size=kernel, stride=stride)] 
+
+            else:
+                self.output_layer = [nn.Linear(in_features=n_theta_hidden[-1], out_features=n_theta)]
+
+        layers = hidden_layers + self.output_layer
 
         # n_s is computed with data, n_s_hidden is provided by user, if 0 no statics are used
         if (self.n_s > 0) and (self.n_s_hidden > 0):
@@ -209,16 +237,7 @@ class _NHITSBlock(nn.Module):
         # Compute local projection weights and projection
         #print("Post applying static encoding")
         #print(insample_y.shape)
-        hidden_theta = self.layers(insample_y)
-
-        #print(hidden_theta.unsqueeze(1))
-
-        theta = self.output_layer(hidden_theta.unsqueeze(1))
-
-        #theta = theta.squeeze(1)
-
-        print(theta.shape)
-
+        theta = self.layers(insample_y)
         backcast, forecast = self.basis(theta, insample_x_t, outsample_x_t)
 
         return backcast, forecast
@@ -240,8 +259,9 @@ class _NHITS(nn.Module):
                  n_layers: list,
                  n_theta_hidden: list,
                  n_pool_kernel_size: list,
-                 #n_freq_downsample: list,
+                 n_freq_downsample: list,
                  pooling_mode,
+                 layer_mode,
                  interpolation_mode,
                  dropout_prob_theta,
                  activation,
@@ -263,8 +283,9 @@ class _NHITS(nn.Module):
                                    n_layers=n_layers,
                                    n_theta_hidden=n_theta_hidden,
                                    n_pool_kernel_size=n_pool_kernel_size,
-                                   #n_freq_downsample=n_freq_downsample,
+                                   n_freq_downsample=n_freq_downsample,
                                    pooling_mode=pooling_mode,
+                                   layer_mode=layer_mode,
                                    interpolation_mode=interpolation_mode,
                                    batch_normalization=batch_normalization,
                                    dropout_prob_theta=dropout_prob_theta,
@@ -277,8 +298,7 @@ class _NHITS(nn.Module):
                      n_time_in, n_time_out,
                      n_x, n_x_hidden, n_s, n_s_hidden,
                      n_layers, n_theta_hidden,
-                     n_pool_kernel_size, #n_freq_downsample, 
-                     pooling_mode, interpolation_mode,
+                     n_pool_kernel_size, n_freq_downsample, pooling_mode, layer_mode, interpolation_mode,
                      batch_normalization, dropout_prob_theta,
                      activation, shared_weights, initialization):
 
@@ -298,7 +318,7 @@ class _NHITS(nn.Module):
                     nbeats_block = block_list[-1]
                 else:
                     if stack_types[i] == 'identity':
-                        #n_theta = (n_time_in + max(n_time_out//n_freq_downsample[i], 1) )
+                        n_theta = (n_time_in + max(n_time_out//n_freq_downsample[i], 1) )
                         basis = IdentityBasis(backcast_size=n_time_in,
                                               forecast_size=n_time_out,
                                               interpolation_mode=interpolation_mode)
@@ -311,10 +331,11 @@ class _NHITS(nn.Module):
                                                    n_x=n_x,
                                                    n_s=n_s,
                                                    n_s_hidden=n_s_hidden,
-                                                   #n_theta=n_theta,
+                                                   n_theta=n_theta,
                                                    n_theta_hidden=n_theta_hidden[i],
                                                    n_pool_kernel_size=n_pool_kernel_size[i],
                                                    pooling_mode=pooling_mode,
+                                                   layer_mode=layer_mode,
                                                    basis=basis,
                                                    n_layers=n_layers[i],
                                                    batch_normalization=batch_normalization_block,
@@ -417,8 +438,9 @@ class NHITS(pl.LightningModule):
                  n_layers,
                  n_theta_hidden,
                  n_pool_kernel_size,
-                 #n_freq_downsample,
+                 n_freq_downsample,
                  pooling_mode,
+                 layer_mode,
                  interpolation_mode,
                  batch_normalization,
                  dropout_prob_theta,
@@ -519,8 +541,9 @@ class NHITS(pl.LightningModule):
         self.n_layers = n_layers
         self.n_theta_hidden = n_theta_hidden
         self.n_pool_kernel_size = n_pool_kernel_size
-        #self.n_freq_downsample = n_freq_downsample
+        self.n_freq_downsample = n_freq_downsample
         self.pooling_mode = pooling_mode
+        self.layer_mode = layer_mode
         self.interpolation_mode = interpolation_mode
 
         # Loss functions
@@ -557,8 +580,9 @@ class NHITS(pl.LightningModule):
                              n_layers=self.n_layers,
                              n_theta_hidden=self.n_theta_hidden,
                              n_pool_kernel_size=self.n_pool_kernel_size,
-                             #n_freq_downsample=self.n_freq_downsample,
+                             n_freq_downsample=self.n_freq_downsample,
                              pooling_mode=self.pooling_mode,
+                             layer_mode=layer_mode,
                              interpolation_mode=self.interpolation_mode,
                              dropout_prob_theta=self.dropout_prob_theta,
                              activation=self.activation,
