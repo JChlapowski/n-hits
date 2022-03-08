@@ -49,37 +49,31 @@ class _HiddenFeaturesLinearEncoder(nn.Module):
         if len(x.size()) == 3:
 
             x = x.squeeze(1)
-            x = self.encoder(x)
 
-        else:
-            x = self.encoder(x)
+        x = self.encoder(x)
         
         return x
 
 class _HiddenFeaturesConvEncoder(nn.Module):
     def __init__(self, kernel_size, stride, num_features, activ):
         super(_HiddenFeaturesConvEncoder, self).__init__()
-
-        layers = []
         
-        if activ != None:
-
-            layers.append(nn.Conv1d(1, 1, kernel_size=kernel_size, stride=stride))
-            layers.append(nn.BatchNorm1d(num_features=num_features))
-            layers.append(activ)
-
-        else:
-            layers.append(nn.Conv1d(1, 1, kernel_size=kernel_size, stride=stride))
-
-        self.encoder = nn.Sequential(*layers)
+        self.ConvLayer = nn.Conv1d(1, 1, kernel_size=kernel_size, stride=stride)
+        self.BatchNorm = nn.BatchNorm1d(num_features=num_features)
+        self.activ = activ
 
     def forward(self, x):
         if len(x.size()) == 2:
             x = x.unsqueeze(1)
-            x = self.encoder(x)
 
-        else:
-            x = self.encoder(x)
+        x = self.ConvLayer(x)
+        
+        if self.activ != None:
+
+            x = x.squeeze(1)
+            x = self.BatchNorm(x)
+
+            x = self.activ(x)
         
         return x
 
