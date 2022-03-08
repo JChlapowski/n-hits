@@ -247,24 +247,37 @@ class _NHITSBlock(nn.Module):
 
             if n_theta_hidden[-1] > n_theta:
 
-                if math.floor(n_theta_hidden[-1]/n_theta) > 2:
+                if math.floor(n_theta_hidden[-1]/n_theta) >= 2:
 
                     kernel = math.floor(n_theta_hidden[-1]/n_theta)
                     stride = kernel
 
-                    self.output_layer = [_HiddenFeaturesConvEncoder(kernel_size=kernel, 
-                                                                    stride=stride, 
-                                                                    num_features=n_theta_hidden[-1], 
-                                                                    activ=None)]
+                    n_theta_adjusted = math.floor(((n_theta_hidden[-1] - kernel)/stride) + 1)
+
+                    if n_theta_adjusted != n_theta:
+
+                        self.output_layer = [_HiddenFeaturesConvEncoder(kernel_size=kernel, 
+                                                                        stride=stride, 
+                                                                        num_features=n_theta_adjusted, 
+                                                                        activ=activ),
+                                            _HiddenFeaturesLinearEncoder(in_features=n_theta_adjusted, 
+                                                                        out_features=n_theta, 
+                                                                        activ=None)]
+
+                    else:
+                        self.output_layer = [_HiddenFeaturesConvEncoder(kernel_size=kernel, 
+                                                                        stride=stride, 
+                                                                        num_features=n_theta_adjusted, 
+                                                                        activ=None)]
 
                 else:
 
                     stride = 1
-                    kernel = math.floor(n_theta_hidden[-1] - n_theta) + 1
+                    kernel = n_theta_hidden[-1] - n_theta + 1
 
                     self.output_layer = [_HiddenFeaturesConvEncoder(kernel_size=kernel, 
                                                                     stride=stride, 
-                                                                    num_features=n_theta_hidden[-1], 
+                                                                    num_features=n_theta, 
                                                                     activ=None)] 
 
             else:

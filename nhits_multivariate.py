@@ -24,12 +24,12 @@ def get_experiment_space(args):
             'n_blocks': hp.choice('n_blocks', [ 3*[1]]),
             'n_layers': hp.choice('n_layers', [ 9*[2] ]),
             'n_hidden': hp.choice('n_hidden', [ 512 ]),
-            'n_pool_kernel_size': hp.choice('n_pool_kernel_size', [3*[2], 3*[4], 3*[8], [8, 4, 1], [16, 8, 1] ]),
+            'n_pool_kernel_size': hp.choice('n_pool_kernel_size', [ 3*[4], 3*[8], [8, 4, 1], [16, 8, 1] ]),
             'n_freq_downsample': hp.choice('n_freq_downsample', [ [168, 24, 1], [24, 12, 1],
                                                                   [180, 60, 1], [60, 8, 1],
                                                                   [40, 20, 1]
                                                                 ]),
-            'pooling_mode': hp.choice('pooling_mode', [ 'conv' ]),
+            'pooling_mode': hp.choice('pooling_mode', [ 'max' ]),
             'layer_mode': hp.choice('layer_mode', [ 'conv' ]),
             'interpolation_mode': hp.choice('interpolation_mode', ['linear']),
             # Regularization and optimization parameters
