@@ -199,13 +199,15 @@ class _NHITSBlock(nn.Module):
             
             if layer_mode == 'conv' and n_theta_hidden[i] > n_theta_hidden[i+1]:
 
-                if math.floor(n_theta_hidden[i]/n_theta_hidden[i+1]) > 2:
+                if math.floor(n_theta_hidden[i]/n_theta_hidden[i+1]) >= 2:
                     kernel = math.floor(n_theta_hidden[i]/n_theta_hidden[i+1])
                     stride = kernel
 
+                    n_theta_hidden[i+1] = math.floor(((n_theta_hidden[i] - kernel)/stride) + 1)
+
                     hidden_layers.append(_HiddenFeaturesConvEncoder(kernel_size=kernel, 
                                                                     stride=stride, 
-                                                                    num_features=n_theta_hidden[i], 
+                                                                    num_features=n_theta_hidden[i+1], 
                                                                     activ=activ))
 
                     # if self.batch_normalization:
@@ -215,11 +217,11 @@ class _NHITSBlock(nn.Module):
                         hidden_layers.append(nn.Dropout(p=self.dropout_prob))
                 else:
                     stride = 1
-                    kernel = math.floor(n_theta_hidden[i] - n_theta_hidden[i+1]) + 1
+                    kernel = n_theta_hidden[i] - n_theta_hidden[i+1] + 1
 
                     hidden_layers.append(_HiddenFeaturesConvEncoder(kernel_size=kernel, 
                                                                     stride=stride, 
-                                                                    num_features=n_theta_hidden[i], 
+                                                                    num_features=n_theta_hidden[i+1], 
                                                                     activ=activ))
 
             else:
