@@ -205,7 +205,7 @@ class _NHITSBlock(nn.Module):
 
                     hidden_layers.append(_HiddenFeaturesConvEncoder(kernel_size=kernel, 
                                                                     stride=stride, 
-                                                                    num_features=n_theta_hidden[i+1], 
+                                                                    num_features=n_theta_hidden[i], 
                                                                     activ=activ))
 
                     # if self.batch_normalization:
@@ -219,7 +219,7 @@ class _NHITSBlock(nn.Module):
 
                     hidden_layers.append(_HiddenFeaturesConvEncoder(kernel_size=kernel, 
                                                                     stride=stride, 
-                                                                    num_features=n_theta_hidden[i+1], 
+                                                                    num_features=n_theta_hidden[i], 
                                                                     activ=activ))
 
             else:
@@ -228,7 +228,7 @@ class _NHITSBlock(nn.Module):
                                                                   activ=activ))
 
                 if self.batch_normalization:
-                    print("Applying batch norm")
+                    #print("Applying batch norm")
                     hidden_layers.append(nn.BatchNorm1d(num_features=n_theta_hidden[i+1]))
 
                 if self.dropout_prob>0:
@@ -252,7 +252,7 @@ class _NHITSBlock(nn.Module):
 
                     self.output_layer = [_HiddenFeaturesConvEncoder(kernel_size=kernel, 
                                                                     stride=stride, 
-                                                                    num_features=n_theta, 
+                                                                    num_features=n_theta_hidden[-1], 
                                                                     activ=None)]
 
                 else:
@@ -262,7 +262,7 @@ class _NHITSBlock(nn.Module):
 
                     self.output_layer = [_HiddenFeaturesConvEncoder(kernel_size=kernel, 
                                                                     stride=stride, 
-                                                                    num_features=n_theta, 
+                                                                    num_features=n_theta_hidden[-1], 
                                                                     activ=None)] 
 
             else:
