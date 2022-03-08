@@ -28,6 +28,61 @@ class _StaticFeaturesEncoder(nn.Module):
         x = self.encoder(x)
         return x
 
+class _HiddenFeaturesLinearEncoder(nn.Module):
+    def __init__(self, in_features, out_features, activ):
+        super(_HiddenFeaturesLinearEncoder, self).__init__()
+        
+        layers = []
+        
+        if activ != None:
+
+            layers.append(nn.Linear(in_features=in_features, out_features=out_features))
+            layers.append(activ)
+
+        else:
+            layers.append(nn.Linear(in_features=in_features, out_features=out_features))
+
+        self.encoder = nn.Sequential(*layers)
+
+    def forward(self, x):
+
+        if len(x.size()) == 3:
+
+            x = x.squeeze(1)
+            x = self.encoder(x)
+
+        else:
+            x = self.encoder(x)
+        
+        return x
+
+class _HiddenFeaturesConvEncoder(nn.Module):
+    def __init__(self, kernel_size, stride, num_features, activ):
+        super(_HiddenFeaturesConvEncoder, self).__init__()
+
+        layers = []
+        
+        if activ != None:
+
+            layers.append(nn.Conv1d(1, 1, kernel_size=kernel_size, stride=stride))
+            layers.append(nn.BatchNorm1d(num_features=num_features))
+            layers.append(activ)
+
+        else:
+            layers.append(nn.Conv1d(1, 1, kernel_size=kernel_size, stride=stride))
+
+        self.encoder = nn.Sequential(*layers)
+
+    def forward(self, x):
+        if len(x.size()) == 2:
+            x = x.unsqueeze(1)
+            x = self.encoder(x)
+
+        else:
+            x = self.encoder(x)
+        
+        return x
+
 class _sEncoder(nn.Module):
     def __init__(self, in_features, out_features, n_time_in):
         super(_sEncoder, self).__init__()
@@ -143,7 +198,7 @@ class _NHITSBlock(nn.Module):
             self.pooling_layer = nn.MaxPool1d(kernel_size=self.n_pool_kernel_size,
                                               stride=self.n_pool_kernel_size)
         elif pooling_mode == 'conv':
-            self.pooling_layer = nn.Sequential(nn.Conv1d(1, 1, kernel_size=self.n_pool_kernel_size, stride=self.n_pool_kernel_size))
+            self.pooling_layer = nn.Conv1d(1, 1, kernel_size=self.n_pool_kernel_size, stride=self.n_pool_kernel_size)
             
         hidden_layers = []
         for i in range(n_layers):
@@ -154,7 +209,10 @@ class _NHITSBlock(nn.Module):
                     kernel = math.floor(n_theta_hidden[i]/n_theta_hidden[i+1])
                     stride = kernel
 
-                    hidden_layers.append(nn.Conv1d(1, 1, kernel_size=kernel, stride=stride))
+                    hidden_layers.append(_HiddenFeaturesConvEncoder(kernel_size=kernel, 
+                                                                    stride=stride, 
+                                                                    num_features=n_theta_hidden[i+1], 
+                                                                    activ=activ))
 
                     # if self.batch_normalization:
                     #     hidden_layers.append(nn.BatchNorm1d(num_features=n_theta_hidden[i+1]))
@@ -165,14 +223,15 @@ class _NHITSBlock(nn.Module):
                     stride = 1
                     kernel = math.floor(n_theta_hidden[i] - n_theta_hidden[i+1]) + 1
 
-                    hidden_layers.append(nn.Conv1d(1, 1, kernel_size=kernel, stride=stride))
-
-                hidden_layers.append(nn.BatchNorm1d(num_features=n_theta_hidden[i+1]))
-                hidden_layers.append(activ)
+                    hidden_layers.append(_HiddenFeaturesConvEncoder(kernel_size=kernel, 
+                                                                    stride=stride, 
+                                                                    num_features=n_theta_hidden[i+1], 
+                                                                    activ=activ))
 
             else:
-                hidden_layers.append(nn.Linear(in_features=n_theta_hidden[i], out_features=n_theta_hidden[i+1]))
-                hidden_layers.append(activ)
+                hidden_layers.append(_HiddenFeaturesLinearEncoder(in_features=n_theta_hidden[i], 
+                                                                  out_features=n_theta_hidden[i+1], 
+                                                                  activ=activ))
 
                 if self.batch_normalization:
                     hidden_layers.append(nn.BatchNorm1d(num_features=n_theta_hidden[i+1]))
@@ -183,7 +242,9 @@ class _NHITSBlock(nn.Module):
             
         if layer_mode == 'linear':
 
-            self.output_layer = [nn.Linear(in_features=n_theta_hidden[-1], out_features=n_theta)]
+            self.output_layer = [_HiddenFeaturesLinearEncoder(in_features=n_theta_hidden[-1], 
+                                                              out_features=n_theta, 
+                                                              activ=None)]
         
         elif layer_mode == 'conv':
 
@@ -194,17 +255,25 @@ class _NHITSBlock(nn.Module):
                     kernel = math.floor(n_theta_hidden[-1]/n_theta)
                     stride = kernel
 
-                    self.output_layer = [nn.Conv1d(1, 1, kernel_size=kernel, stride=stride)]
+                    self.output_layer = [_HiddenFeaturesConvEncoder(kernel_size=kernel, 
+                                                                    stride=stride, 
+                                                                    num_features=n_theta, 
+                                                                    activ=None)]
 
                 else:
 
                     stride = 1
                     kernel = math.floor(n_theta_hidden[-1] - n_theta) + 1
 
-                    self.output_layer = [nn.Conv1d(1, 1, kernel_size=kernel, stride=stride)] 
+                    self.output_layer = [_HiddenFeaturesConvEncoder(kernel_size=kernel, 
+                                                                    stride=stride, 
+                                                                    num_features=n_theta, 
+                                                                    activ=None)] 
 
             else:
-                self.output_layer = [nn.Linear(in_features=n_theta_hidden[-1], out_features=n_theta)]
+                self.output_layer = [_HiddenFeaturesLinearEncoder(in_features=n_theta_hidden[-1], 
+                                                                  out_features=n_theta, 
+                                                                  activ=None)]
 
         layers = hidden_layers + self.output_layer
 
@@ -239,12 +308,9 @@ class _NHITSBlock(nn.Module):
         # Compute local projection weights and projection
         #print("Post applying static encoding")
         #print(insample_y.shape)
-        if self.layer_mode == 'conv':
-            insample_y = insample_y.unsqueeze(1)
-
         theta = self.layers(insample_y)
 
-        if self.layer_mode == 'conv':
+        if len(theta.size()) == 3:
             theta = theta.squeeze(1)
         
         backcast, forecast = self.basis(theta, insample_x_t, outsample_x_t)
