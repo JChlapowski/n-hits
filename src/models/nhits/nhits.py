@@ -143,7 +143,7 @@ def init_weights(module, initialization):
         else:
             assert 1<0, f'Initialization {initialization} not found'
     elif type(module) == t.nn.Conv1d:
-        t.nn.init.xavier_normal_(module.weight)
+        t.nn.init.kaiming_uniform_(module.weight, nonlinearity='relu')
 
 # Cell
 ACTIVATIONS = ['ReLU',
@@ -228,6 +228,7 @@ class _NHITSBlock(nn.Module):
                                                                   activ=activ))
 
                 if self.batch_normalization:
+                    print("Applying batch norm")
                     hidden_layers.append(nn.BatchNorm1d(num_features=n_theta_hidden[i+1]))
 
                 if self.dropout_prob>0:
