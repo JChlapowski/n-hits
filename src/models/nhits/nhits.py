@@ -155,10 +155,9 @@ class _NHITSBlock(nn.Module):
                     stride = kernel
 
                     hidden_layers.append(nn.Conv1d(1, 1, kernel_size=kernel, stride=stride))
-                    hidden_layers.append(activ)
 
-                    if self.batch_normalization:
-                        hidden_layers.append(nn.BatchNorm1d(num_features=n_theta_hidden[i+1]))
+                    # if self.batch_normalization:
+                    #     hidden_layers.append(nn.BatchNorm1d(num_features=n_theta_hidden[i+1]))
 
                     if self.dropout_prob>0:
                         hidden_layers.append(nn.Dropout(p=self.dropout_prob))
@@ -167,7 +166,9 @@ class _NHITSBlock(nn.Module):
                     kernel = math.floor(n_theta_hidden[i] - n_theta_hidden[i+1]) + 1
 
                     hidden_layers.append(nn.Conv1d(1, 1, kernel_size=kernel, stride=stride))
-                    hidden_layers.append(activ)
+
+                hidden_layers.append(nn.BatchNorm1d(num_features=n_theta_hidden[i+1]))
+                hidden_layers.append(activ)
 
             else:
                 hidden_layers.append(nn.Linear(in_features=n_theta_hidden[i], out_features=n_theta_hidden[i+1]))
