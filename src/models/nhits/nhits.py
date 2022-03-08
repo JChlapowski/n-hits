@@ -131,6 +131,7 @@ class _NHITSBlock(nn.Module):
         self.n_s_hidden = n_s_hidden
         self.n_x = n_x
         self.n_pool_kernel_size = n_pool_kernel_size
+        self.layer_mode = layer_mode
     
         self.batch_normalization = batch_normalization
         self.dropout_prob = dropout_prob
@@ -237,7 +238,14 @@ class _NHITSBlock(nn.Module):
         # Compute local projection weights and projection
         #print("Post applying static encoding")
         #print(insample_y.shape)
+        if self.layer_mode == 'conv':
+            insample_y = insample_y.unsqueeze(1)
+
         theta = self.layers(insample_y)
+
+        if self.layer_mode == 'conv':
+            theta = theta.squeeze(1)
+        
         backcast, forecast = self.basis(theta, insample_x_t, outsample_x_t)
 
         return backcast, forecast
