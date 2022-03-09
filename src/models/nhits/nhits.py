@@ -165,7 +165,7 @@ def init_weights(module, initialization):
             pass #t.nn.init.normal_(module.weight, 0.0, std=1/np.sqrt(module.weight.numel()))
         else:
             assert 1<0, f'Initialization {initialization} not found'
-    elif type(module) == t.nn.Conv1d:
+    elif type(module) == t.nn.Conv1d or type(module) == t.nn.ConvTranspose1d:
         t.nn.init.kaiming_uniform_(module.weight, nonlinearity='relu')
 
 # Cell
@@ -250,7 +250,7 @@ class _NHITSBlock(nn.Module):
 
             #upsample conv
             elif layer_mode == 'conv' and n_theta_hidden[i] < n_theta_hidden[i+1]:
-                print("Making Convnet")
+
                 if math.floor(n_theta_hidden[i+1]/n_theta_hidden[i]) >= 2:
                     kernel = math.floor(n_theta_hidden[i+1]/n_theta_hidden[i])
                     stride = kernel
