@@ -250,7 +250,7 @@ class _NHITSBlock(nn.Module):
 
             #upsample conv
             elif layer_mode == 'conv' and n_theta_hidden[i] < n_theta_hidden[i+1]:
-
+                print("Making Convnet")
                 if math.floor(n_theta_hidden[i+1]/n_theta_hidden[i]) >= 2:
                     kernel = math.floor(n_theta_hidden[i+1]/n_theta_hidden[i])
                     stride = kernel
