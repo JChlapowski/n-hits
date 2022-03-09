@@ -196,7 +196,7 @@ class _NHITSBlock(nn.Module):
             
         hidden_layers = []
         for i in range(n_layers):
-            
+            print(n_theta_hidden[i])
             if layer_mode == 'conv' and n_theta_hidden[i] > n_theta_hidden[i+1]:
 
                 if math.floor(n_theta_hidden[i]/n_theta_hidden[i+1]) >= 2:

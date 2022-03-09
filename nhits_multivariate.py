@@ -29,7 +29,7 @@ def get_experiment_space(args):
                                                                   [180, 60, 1], [60, 8, 1],
                                                                   [40, 20, 1]
                                                                 ]),
-            'pooling_mode': hp.choice('pooling_mode', [ 'max' ]),
+            'pooling_mode': hp.choice('pooling_mode', [ 'conv' ]),
             'layer_mode': hp.choice('layer_mode', [ 'conv' ]),
             'interpolation_mode': hp.choice('interpolation_mode', ['linear']),
             # Regularization and optimization parameters
@@ -42,7 +42,7 @@ def get_experiment_space(args):
             'weight_decay': hp.choice('weight_decay', [0] ),
             'max_epochs': hp.choice('max_epochs', [None]),
             'max_steps': hp.choice('max_steps', [1_000]),
-            'early_stop_patience': hp.choice('early_stop_patience', [10]),
+            'early_stop_patience': hp.choice('early_stop_patience', [50]),
             'eval_freq': hp.choice('eval_freq', [50]),
             'loss_train': hp.choice('loss', ['MAE']),
             'loss_hypar': hp.choice('loss_hypar', [0.5]),                
