@@ -357,6 +357,7 @@ def instantiate_nhits(mc):
                       n_freq_downsample=mc['n_freq_downsample'],
                       pooling_mode=mc['pooling_mode'],
                       layer_mode=mc['layer_mode'],
+                      output_layer=mc['output_layer'],
                       interpolation_mode=mc['interpolation_mode'],
                       batch_normalization = mc['batch_normalization'],
                       dropout_prob_theta=mc['dropout_prob_theta'],

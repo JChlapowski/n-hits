@@ -183,7 +183,7 @@ class _NHITSBlock(nn.Module):
     """
     def __init__(self, n_time_in: int, n_time_out: int, n_x: int,
                  n_s: int, n_s_hidden: int, n_theta: int, n_theta_hidden: list,
-                 n_pool_kernel_size: int, pooling_mode: str, layer_mode: str, basis: nn.Module,
+                 n_pool_kernel_size: int, pooling_mode: str, layer_mode: str, output_layer: str, basis: nn.Module,
                  n_layers: int,  batch_normalization: bool, dropout_prob: float, activation: str):
         """
         """
@@ -276,7 +276,7 @@ class _NHITSBlock(nn.Module):
                                                                     num_features=n_theta_hidden[i+1], 
                                                                     activ=activ))
 
-            else:
+            elif layer_mode == 'linear':
                 hidden_layers.append(_HiddenFeaturesLinearEncoder(in_features=n_theta_hidden[i], 
                                                                   out_features=n_theta_hidden[i+1], 
                                                                   activ=activ))
@@ -289,13 +289,13 @@ class _NHITSBlock(nn.Module):
                     hidden_layers.append(nn.Dropout(p=self.dropout_prob))
 
             
-        if layer_mode == 'linear':
+        if output_layer == 'linear':
 
             self.output_layer = [_HiddenFeaturesLinearEncoder(in_features=n_theta_hidden[-1], 
                                                               out_features=n_theta, 
                                                               activ=None)]
         
-        elif layer_mode == 'conv':
+        elif output_layer == 'conv':
 
             if n_theta_hidden[-1] > n_theta:
 
@@ -367,10 +367,43 @@ class _NHITSBlock(nn.Module):
                                                                     num_features=n_theta, 
                                                                     activ=None)] 
 
-        else:
-            self.output_layer = [_HiddenFeaturesLinearEncoder(in_features=n_theta_hidden[-1], 
-                                                                out_features=n_theta, 
-                                                                activ=None)]
+            else:
+                self.output_layer = [_HiddenFeaturesLinearEncoder(in_features=n_theta_hidden[-1], 
+                                                            out_features=n_theta, 
+                                                            activ=None)]
+
+        elif output_layer == 'max':
+            
+            if n_theta_hidden[-1] > n_theta:
+
+                if math.floor(n_theta_hidden[-1]/n_theta) >= 2:
+
+                    kernel = math.floor(n_theta_hidden[-1]/n_theta)
+                    stride = kernel
+
+                    n_theta_adjusted = math.floor(((n_theta_hidden[-1] - kernel)/stride) + 1)
+
+                    if n_theta_adjusted != n_theta:
+
+                        self.output_layer = [nn.MaxPool1d(kernel_size=kernel, stride=stride),
+                                            _HiddenFeaturesLinearEncoder(in_features=n_theta_adjusted, 
+                                                                        out_features=n_theta, 
+                                                                        activ=None)]
+
+                    else:
+                        self.output_layer = [nn.MaxPool1d(kernel_size=kernel, stride=stride)]
+
+                else:
+
+                    stride = 1
+                    kernel = n_theta_hidden[-1] - n_theta + 1
+
+                    self.output_layer = [nn.MaxPool1d(kernel_size=kernel, stride=stride)]
+            
+            else:
+                self.output_layer = [_HiddenFeaturesLinearEncoder(in_features=n_theta_hidden[-1], 
+                                                              out_features=n_theta, 
+                                                              activ=None)]
 
         layers = hidden_layers + self.output_layer
 
@@ -434,6 +467,7 @@ class _NHITS(nn.Module):
                  n_freq_downsample: list,
                  pooling_mode,
                  layer_mode,
+                 output_layer,
                  interpolation_mode,
                  dropout_prob_theta,
                  activation,
@@ -458,6 +492,7 @@ class _NHITS(nn.Module):
                                    n_freq_downsample=n_freq_downsample,
                                    pooling_mode=pooling_mode,
                                    layer_mode=layer_mode,
+                                   output_layer=output_layer,
                                    interpolation_mode=interpolation_mode,
                                    batch_normalization=batch_normalization,
                                    dropout_prob_theta=dropout_prob_theta,
@@ -470,7 +505,10 @@ class _NHITS(nn.Module):
                      n_time_in, n_time_out,
                      n_x, n_x_hidden, n_s, n_s_hidden,
                      n_layers, n_theta_hidden,
-                     n_pool_kernel_size, n_freq_downsample, pooling_mode, layer_mode, interpolation_mode,
+                     n_pool_kernel_size, n_freq_downsample, pooling_mode, 
+                     layer_mode, 
+                     output_layer,
+                     interpolation_mode,
                      batch_normalization, dropout_prob_theta,
                      activation, shared_weights, initialization):
 
@@ -508,6 +546,7 @@ class _NHITS(nn.Module):
                                                    n_pool_kernel_size=n_pool_kernel_size[i],
                                                    pooling_mode=pooling_mode,
                                                    layer_mode=layer_mode,
+                                                   output_layer=output_layer,
                                                    basis=basis,
                                                    n_layers=n_layers[i],
                                                    batch_normalization=batch_normalization_block,
@@ -613,6 +652,7 @@ class NHITS(pl.LightningModule):
                  n_freq_downsample,
                  pooling_mode,
                  layer_mode,
+                 output_layer,
                  interpolation_mode,
                  batch_normalization,
                  dropout_prob_theta,
@@ -755,6 +795,7 @@ class NHITS(pl.LightningModule):
                              n_freq_downsample=self.n_freq_downsample,
                              pooling_mode=self.pooling_mode,
                              layer_mode=layer_mode,
+                             output_layer=output_layer,
                              interpolation_mode=self.interpolation_mode,
                              dropout_prob_theta=self.dropout_prob_theta,
                              activation=self.activation,
