@@ -54,11 +54,34 @@ class _HiddenFeaturesLinearEncoder(nn.Module):
         
         return x
 
-class _HiddenFeaturesConvEncoder(nn.Module):
+class _HiddenFeaturesDownSampleEncoder(nn.Module):
     def __init__(self, kernel_size, stride, num_features, activ):
-        super(_HiddenFeaturesConvEncoder, self).__init__()
+        super(_HiddenFeaturesDownSampleEncoder, self).__init__()
         
         self.ConvLayer = nn.Conv1d(1, 1, kernel_size=kernel_size, stride=stride)
+        self.BatchNorm = nn.BatchNorm1d(num_features=num_features)
+        self.activ = activ
+
+    def forward(self, x):
+        if len(x.size()) == 2:
+            x = x.unsqueeze(1)
+
+        x = self.ConvLayer(x)
+        
+        if self.activ != None:
+
+            x = x.squeeze(1)
+            x = self.BatchNorm(x)
+
+            x = self.activ(x)
+        
+        return x
+
+class _HiddenFeaturesUpsampleEncoder(nn.Module):
+    def __init__(self, kernel_size, stride, num_features, activ):
+        super(_HiddenFeaturesUpsampleEncoder, self).__init__()
+        
+        self.ConvLayer = nn.ConvTranspose1d(1, 1, kernel_size=kernel_size, stride=stride)
         self.BatchNorm = nn.BatchNorm1d(num_features=num_features)
         self.activ = activ
 
@@ -196,18 +219,17 @@ class _NHITSBlock(nn.Module):
             
         hidden_layers = []
         for i in range(n_layers):
-
+            
+            #downsample conv
             if layer_mode == 'conv' and n_theta_hidden[i] > n_theta_hidden[i+1]:
-                
-                print("Making conv layer")
-                
+                                
                 if math.floor(n_theta_hidden[i]/n_theta_hidden[i+1]) >= 2:
                     kernel = math.floor(n_theta_hidden[i]/n_theta_hidden[i+1])
                     stride = kernel
 
                     n_theta_hidden[i+1] = math.floor(((n_theta_hidden[i] - kernel)/stride) + 1)
 
-                    hidden_layers.append(_HiddenFeaturesConvEncoder(kernel_size=kernel, 
+                    hidden_layers.append(_HiddenFeaturesDownSampleEncoder(kernel_size=kernel, 
                                                                     stride=stride, 
                                                                     num_features=n_theta_hidden[i+1], 
                                                                     activ=activ))
@@ -221,7 +243,35 @@ class _NHITSBlock(nn.Module):
                     stride = 1
                     kernel = n_theta_hidden[i] - n_theta_hidden[i+1] + 1
 
-                    hidden_layers.append(_HiddenFeaturesConvEncoder(kernel_size=kernel, 
+                    hidden_layers.append(_HiddenFeaturesDownSampleEncoder(kernel_size=kernel, 
+                                                                    stride=stride, 
+                                                                    num_features=n_theta_hidden[i+1], 
+                                                                    activ=activ))
+
+            #upsample conv
+            elif layer_mode == 'conv' and n_theta_hidden[i] < n_theta_hidden[i+1]:
+
+                if math.floor(n_theta_hidden[i+1]/n_theta_hidden[i]) >= 2:
+                    kernel = math.floor(n_theta_hidden[i+1]/n_theta_hidden[i])
+                    stride = kernel
+
+                    n_theta_hidden[i+1] = kernel * n_theta_hidden[i]
+
+                    hidden_layers.append(_HiddenFeaturesUpsampleEncoder(kernel_size=kernel, 
+                                                                    stride=stride, 
+                                                                    num_features=n_theta_hidden[i+1], 
+                                                                    activ=activ))
+
+                    # if self.batch_normalization:
+                    #     hidden_layers.append(nn.BatchNorm1d(num_features=n_theta_hidden[i+1]))
+
+                    if self.dropout_prob>0:
+                        hidden_layers.append(nn.Dropout(p=self.dropout_prob))
+                else:
+                    stride = 1
+                    kernel = n_theta_hidden[i+1] - n_theta_hidden[i] + 1
+
+                    hidden_layers.append(_HiddenFeaturesUpsampleEncoder(kernel_size=kernel, 
                                                                     stride=stride, 
                                                                     num_features=n_theta_hidden[i+1], 
                                                                     activ=activ))
@@ -258,7 +308,7 @@ class _NHITSBlock(nn.Module):
 
                     if n_theta_adjusted != n_theta:
 
-                        self.output_layer = [_HiddenFeaturesConvEncoder(kernel_size=kernel, 
+                        self.output_layer = [_HiddenFeaturesDownSampleEncoder(kernel_size=kernel, 
                                                                         stride=stride, 
                                                                         num_features=n_theta_adjusted, 
                                                                         activ=activ),
@@ -267,7 +317,7 @@ class _NHITSBlock(nn.Module):
                                                                         activ=None)]
 
                     else:
-                        self.output_layer = [_HiddenFeaturesConvEncoder(kernel_size=kernel, 
+                        self.output_layer = [_HiddenFeaturesDownSampleEncoder(kernel_size=kernel, 
                                                                         stride=stride, 
                                                                         num_features=n_theta_adjusted, 
                                                                         activ=None)]
@@ -277,15 +327,50 @@ class _NHITSBlock(nn.Module):
                     stride = 1
                     kernel = n_theta_hidden[-1] - n_theta + 1
 
-                    self.output_layer = [_HiddenFeaturesConvEncoder(kernel_size=kernel, 
+                    self.output_layer = [_HiddenFeaturesDownSampleEncoder(kernel_size=kernel, 
                                                                     stride=stride, 
                                                                     num_features=n_theta, 
                                                                     activ=None)] 
 
-            else:
-                self.output_layer = [_HiddenFeaturesLinearEncoder(in_features=n_theta_hidden[-1], 
-                                                                  out_features=n_theta, 
-                                                                  activ=None)]
+            elif n_theta_hidden[-1] < n_theta:
+
+                if math.floor(n_theta/n_theta_hidden[-1]) >= 2:
+
+                    kernel = math.floor(n_theta/n_theta_hidden[-1])
+                    stride = kernel
+
+                    n_theta_adjusted = kernel * n_theta_hidden[-1]
+
+                    if n_theta_adjusted != n_theta:
+
+                        self.output_layer = [_HiddenFeaturesUpsampleEncoder(kernel_size=kernel, 
+                                                                        stride=stride, 
+                                                                        num_features=n_theta_adjusted, 
+                                                                        activ=activ),
+                                            _HiddenFeaturesLinearEncoder(in_features=n_theta_adjusted, 
+                                                                        out_features=n_theta, 
+                                                                        activ=None)]
+
+                    else:
+                        self.output_layer = [_HiddenFeaturesUpsampleEncoder(kernel_size=kernel, 
+                                                                        stride=stride, 
+                                                                        num_features=n_theta_adjusted, 
+                                                                        activ=None)]
+
+                else:
+
+                    stride = 1
+                    kernel = n_theta - n_theta_hidden[-1] + 1
+
+                    self.output_layer = [_HiddenFeaturesUpsampleEncoder(kernel_size=kernel, 
+                                                                    stride=stride, 
+                                                                    num_features=n_theta, 
+                                                                    activ=None)] 
+
+        else:
+            self.output_layer = [_HiddenFeaturesLinearEncoder(in_features=n_theta_hidden[-1], 
+                                                                out_features=n_theta, 
+                                                                activ=None)]
 
         layers = hidden_layers + self.output_layer
 
