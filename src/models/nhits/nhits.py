@@ -394,6 +394,8 @@ class _NHITSBlock(nn.Module):
 
         elif output_layer == 'max':
             
+            print(n_theta_hidden[-1])
+
             if n_theta_hidden[-1] > n_theta:
 
                 if math.floor(n_theta_hidden[-1]/n_theta) >= 2:
