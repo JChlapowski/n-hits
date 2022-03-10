@@ -29,19 +29,24 @@ class _StaticFeaturesEncoder(nn.Module):
         return x
 
 class _HiddenFeaturesLinearEncoder(nn.Module):
-    def __init__(self, in_features, out_features, activ):
+    def __init__(self, in_features, out_features, activ, batch_normalization, dropout_prob):
         super(_HiddenFeaturesLinearEncoder, self).__init__()
         
         layers = []
+
+        if dropout_prob > 0:
+            layers.append(nn.Dropout(dropout_prob))
+
+        layers.append(nn.Linear(in_features=in_features, out_features=out_features))
+        
+        if batch_normalization:
+            layers.append(nn.BatchNorm1d(num_features=out_features))
         
         if activ != None:
 
-            layers.append(nn.Linear(in_features=in_features, out_features=out_features))
             layers.append(activ)
 
-        else:
-            layers.append(nn.Linear(in_features=in_features, out_features=out_features))
-
+        
         self.encoder = nn.Sequential(*layers)
 
     def forward(self, x):
@@ -279,21 +284,25 @@ class _NHITSBlock(nn.Module):
             elif layer_mode == 'linear':
                 hidden_layers.append(_HiddenFeaturesLinearEncoder(in_features=n_theta_hidden[i], 
                                                                   out_features=n_theta_hidden[i+1], 
-                                                                  activ=activ))
+                                                                  activ=activ,
+                                                                  batch_normalization=self.batch_normalization,
+                                                                  dropout_prob=self.dropout_prob))
 
-                if self.batch_normalization:
-                    #print("Applying batch norm")
-                    hidden_layers.append(nn.BatchNorm1d(num_features=n_theta_hidden[i+1]))
+                # if self.batch_normalization:
+                #     #print("Applying batch norm")
+                #     hidden_layers.append(nn.BatchNorm1d(num_features=n_theta_hidden[i+1]))
 
-                if self.dropout_prob>0:
-                    hidden_layers.append(nn.Dropout(p=self.dropout_prob))
+                # if self.dropout_prob>0:
+                #     hidden_layers.append(nn.Dropout(p=self.dropout_prob))
 
             
         if output_layer == 'linear':
 
             self.output_layer = [_HiddenFeaturesLinearEncoder(in_features=n_theta_hidden[-1], 
                                                               out_features=n_theta, 
-                                                              activ=None)]
+                                                              activ=None,
+                                                              batch_normalization=False,
+                                                              dropout_prob=0)]
         
         elif output_layer == 'conv':
 
@@ -399,11 +408,7 @@ class _NHITSBlock(nn.Module):
                     kernel = n_theta_hidden[-1] - n_theta + 1
 
                     self.output_layer = [nn.MaxPool1d(kernel_size=kernel, stride=stride)]
-            
-            else:
-                self.output_layer = [_HiddenFeaturesLinearEncoder(in_features=n_theta_hidden[-1], 
-                                                              out_features=n_theta, 
-                                                              activ=None)]
+
 
         layers = hidden_layers + self.output_layer
 
@@ -425,7 +430,7 @@ class _NHITSBlock(nn.Module):
         insample_y = self.pooling_layer(insample_y)
         insample_y = insample_y.squeeze(1)
 
-        print("Input size prior to pooling: " + str(insample_y.size()))
+        print("Input size after to pooling: " + str(insample_y.size()))
         #print("Post applying conv pooling")
         #print(insample_y.shape)
 
@@ -442,6 +447,7 @@ class _NHITSBlock(nn.Module):
         # Compute local projection weights and projection
         #print("Post applying static encoding")
         #print(insample_y.shape)
+        print("Input size before forecast: " + str(insample_y.size()))
         theta = self.layers(insample_y)
 
         if len(theta.size()) == 3:
