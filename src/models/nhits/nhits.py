@@ -395,6 +395,7 @@ class _NHITSBlock(nn.Module):
         elif output_layer == 'max':
             
             print(n_theta_hidden[-1])
+            print(n_theta)
 
             if n_theta_hidden[-1] > n_theta:
 
