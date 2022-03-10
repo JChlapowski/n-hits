@@ -202,7 +202,7 @@ class _NHITSBlock(nn.Module):
             n_s_hidden = 0
         n_theta_hidden = [n_time_in_pooled + (n_time_in+n_time_out)*n_x + n_s_hidden] + n_theta_hidden
 
-        print(n_theta_hidden)
+        #print(n_theta_hidden)
 
         self.n_time_in = n_time_in
         self.n_time_out = n_time_out
@@ -221,10 +221,17 @@ class _NHITSBlock(nn.Module):
         if pooling_mode == 'max':
             self.pooling_layer = nn.MaxPool1d(kernel_size=self.n_pool_kernel_size,
                                               stride=self.n_pool_kernel_size)
-        elif pooling_mode == 'conv':
-            self.pooling_layer = nn.Conv1d(1, 1, kernel_size=self.n_pool_kernel_size, stride=self.n_pool_kernel_size)
+        # elif pooling_mode == 'conv':
+        #     self.pooling_layer = nn.Conv1d(1, 1, kernel_size=self.n_pool_kernel_size, stride=self.n_pool_kernel_size)
             
         hidden_layers = []
+
+        if pooling_mode == 'conv':
+            hidden_layers.append(_HiddenFeaturesDownSampleEncoder(kernel_size=self.n_pool_kernel_size,
+                                                                  stride=self.n_pool_kernel_size,
+                                                                  num_features=n_theta_hidden[0],
+                                                                  activ=activ))
+        
         for i in range(n_layers):
             
             #downsample conv
