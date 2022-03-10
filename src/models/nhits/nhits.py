@@ -1,5 +1,6 @@
 # Cell
 import math
+from platform import python_implementation
 import random
 import numpy as np
 
@@ -211,6 +212,7 @@ class _NHITSBlock(nn.Module):
         self.n_x = n_x
         self.n_pool_kernel_size = n_pool_kernel_size
         self.layer_mode = layer_mode
+        self.pooling_mode = pooling_mode
     
         self.batch_normalization = batch_normalization
         self.dropout_prob = dropout_prob
@@ -218,7 +220,7 @@ class _NHITSBlock(nn.Module):
         assert activation in ACTIVATIONS, f'{activation} is not in {ACTIVATIONS}'
         activ = getattr(nn, activation)()
 
-        if pooling_mode == 'max':
+        if self.pooling_mode == 'max':
             self.pooling_layer = nn.MaxPool1d(kernel_size=self.n_pool_kernel_size,
                                               stride=self.n_pool_kernel_size)
         # elif pooling_mode == 'conv':
@@ -226,7 +228,7 @@ class _NHITSBlock(nn.Module):
             
         hidden_layers = []
 
-        if pooling_mode == 'conv':
+        if self.pooling_mode == 'conv':
             hidden_layers.append(_HiddenFeaturesDownSampleEncoder(kernel_size=self.n_pool_kernel_size,
                                                                   stride=self.n_pool_kernel_size,
                                                                   num_features=n_theta_hidden[0],
@@ -432,12 +434,13 @@ class _NHITSBlock(nn.Module):
 
 
         #print("Input size prior to pooling: " + str(insample_y.size()))
-        insample_y = insample_y.unsqueeze(1)
-        # Pooling layer to downsample input
-        #print("Before applying conv pooling")
-        #print(insample_y.shape)
-        insample_y = self.pooling_layer(insample_y)
-        insample_y = insample_y.squeeze(1)
+        if self.pooling_mode == 'max':
+            insample_y = insample_y.unsqueeze(1)
+            # Pooling layer to downsample input
+            #print("Before applying conv pooling")
+            #print(insample_y.shape)
+            insample_y = self.pooling_layer(insample_y)
+            insample_y = insample_y.squeeze(1)
 
         #print("Input size after to pooling: " + str(insample_y.size()))
         #print("Post applying conv pooling")
