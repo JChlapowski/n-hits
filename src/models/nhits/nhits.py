@@ -202,6 +202,8 @@ class _NHITSBlock(nn.Module):
             n_s_hidden = 0
         n_theta_hidden = [n_time_in_pooled + (n_time_in+n_time_out)*n_x + n_s_hidden] + n_theta_hidden
 
+        print(n_theta_hidden)
+
         self.n_time_in = n_time_in
         self.n_time_out = n_time_out
         self.n_s = n_s
@@ -422,7 +424,7 @@ class _NHITSBlock(nn.Module):
                 outsample_x_t: t.Tensor, x_s: t.Tensor) -> Tuple[t.Tensor, t.Tensor]:
 
 
-        print("Input size prior to pooling: " + str(insample_y.size()))
+        #print("Input size prior to pooling: " + str(insample_y.size()))
         insample_y = insample_y.unsqueeze(1)
         # Pooling layer to downsample input
         #print("Before applying conv pooling")
@@ -430,7 +432,7 @@ class _NHITSBlock(nn.Module):
         insample_y = self.pooling_layer(insample_y)
         insample_y = insample_y.squeeze(1)
 
-        print("Input size after to pooling: " + str(insample_y.size()))
+        #print("Input size after to pooling: " + str(insample_y.size()))
         #print("Post applying conv pooling")
         #print(insample_y.shape)
 
@@ -447,7 +449,7 @@ class _NHITSBlock(nn.Module):
         # Compute local projection weights and projection
         #print("Post applying static encoding")
         #print(insample_y.shape)
-        print("Input size before forecast: " + str(insample_y.size()))
+        #print("Input size before forecast: " + str(insample_y.size()))
         theta = self.layers(insample_y)
 
         if len(theta.size()) == 3:
