@@ -422,6 +422,11 @@ class _NHITSBlock(nn.Module):
                     kernel = n_theta_hidden[-1] - n_theta + 1
 
                     self.output_layer = [nn.MaxPool1d(kernel_size=kernel, stride=stride)]
+            
+            else:
+                self.output_layer = [_HiddenFeaturesLinearEncoder(in_features=n_theta_hidden[-1], 
+                                                            out_features=n_theta, 
+                                                            activ=None)]
 
 
         layers = hidden_layers + self.output_layer
