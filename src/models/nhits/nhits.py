@@ -416,12 +416,16 @@ class _NHITSBlock(nn.Module):
     def forward(self, insample_y: t.Tensor, insample_x_t: t.Tensor,
                 outsample_x_t: t.Tensor, x_s: t.Tensor) -> Tuple[t.Tensor, t.Tensor]:
 
+
+        print("Input size prior to pooling: " + str(insample_y.size()))
         insample_y = insample_y.unsqueeze(1)
         # Pooling layer to downsample input
         #print("Before applying conv pooling")
         #print(insample_y.shape)
         insample_y = self.pooling_layer(insample_y)
         insample_y = insample_y.squeeze(1)
+
+        print("Input size prior to pooling: " + str(insample_y.size()))
         #print("Post applying conv pooling")
         #print(insample_y.shape)
 
