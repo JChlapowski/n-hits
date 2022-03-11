@@ -189,7 +189,7 @@ class _NHITSBlock(nn.Module):
     """
     def __init__(self, n_time_in: int, n_time_out: int, n_x: int,
                  n_s: int, n_s_hidden: int, n_theta: int, n_theta_hidden: list,
-                 n_pool_kernel_size: int, pooling_mode: str, layer_mode: str, output_layer: str, basis: nn.Module,
+                 n_pool_kernel_size: int, n_freq_downsample: int, pooling_mode: str, layer_mode: str, output_layer: str, basis: nn.Module,
                  n_layers: int,  batch_normalization: bool, dropout_prob: float, activation: str):
         """
         """
@@ -197,7 +197,7 @@ class _NHITSBlock(nn.Module):
 
         assert (pooling_mode in ['max','conv'])
 
-        n_time_in_pooled = int(np.ceil(n_time_in/n_pool_kernel_size))
+        n_time_in_pooled = int(np.ceil(n_time_in/n_freq_downsample))
 
         if n_s == 0:
             n_s_hidden = 0
@@ -220,17 +220,23 @@ class _NHITSBlock(nn.Module):
         assert activation in ACTIVATIONS, f'{activation} is not in {ACTIVATIONS}'
         activ = getattr(nn, activation)()
 
+
+
         if self.pooling_mode == 'max':
-            self.pooling_layer = nn.MaxPool1d(kernel_size=self.n_pool_kernel_size,
-                                              stride=self.n_pool_kernel_size)
+            kernel = n_freq_downsample
+            stride = kernel
+            self.pooling_layer = nn.MaxPool1d(kernel_size=kernel,
+                                              stride=stride)
         # elif pooling_mode == 'conv':
         #     self.pooling_layer = nn.Conv1d(1, 1, kernel_size=self.n_pool_kernel_size, stride=self.n_pool_kernel_size)
             
         hidden_layers = []
 
         if self.pooling_mode == 'conv':
-            hidden_layers.append(_HiddenFeaturesDownSampleEncoder(kernel_size=self.n_pool_kernel_size,
-                                                                  stride=self.n_pool_kernel_size,
+            kernel = n_freq_downsample
+            stride = kernel
+            hidden_layers.append(_HiddenFeaturesDownSampleEncoder(kernel_size=kernel,
+                                                                  stride=stride,
                                                                   num_features=n_theta_hidden[0],
                                                                   activ=None))
         
@@ -581,6 +587,7 @@ class _NHITS(nn.Module):
                                                    n_theta=n_theta,
                                                    n_theta_hidden=n_theta_hidden[i],
                                                    n_pool_kernel_size=n_pool_kernel_size[i],
+                                                   n_freq_downsample=n_freq_downsample[i],
                                                    pooling_mode=pooling_mode,
                                                    layer_mode=layer_mode,
                                                    output_layer=output_layer,
