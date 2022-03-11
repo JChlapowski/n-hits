@@ -232,7 +232,7 @@ class _NHITSBlock(nn.Module):
             hidden_layers.append(_HiddenFeaturesDownSampleEncoder(kernel_size=self.n_pool_kernel_size,
                                                                   stride=self.n_pool_kernel_size,
                                                                   num_features=n_theta_hidden[0],
-                                                                  activ=activ))
+                                                                  activ=None))
         
         for i in range(n_layers):
             

@@ -29,12 +29,12 @@ def get_experiment_space(args):
                                                                   [180, 60, 1], [60, 8, 1],
                                                                   [40, 20, 1]
                                                                 ]),
-            'pooling_mode': hp.choice('pooling_mode', [ 'conv' ]),
-            'layer_mode': hp.choice('layer_mode', [ 'linear' ]),
-            'output_layer': hp.choice('output_layer', [ 'max' ]),
+            'pooling_mode': hp.choice('pooling_mode', [ 'max' ]),
+            'layer_mode': hp.choice('layer_mode', [ 'conv' ]),
+            'output_layer': hp.choice('output_layer', [ 'linear' ]),
             'interpolation_mode': hp.choice('interpolation_mode', ['linear']),
             # Regularization and optimization parameters
-            'batch_normalization': hp.choice('batch_normalization', [False]),
+            'batch_normalization': hp.choice('batch_normalization', [True]),
             'dropout_prob_theta': hp.choice('dropout_prob_theta', [ 0, 0.5 ]),
             'dropout_prob_exogenous': hp.choice('dropout_prob_exogenous', [0]),
             'learning_rate': hp.choice('learning_rate', [0.001]),
