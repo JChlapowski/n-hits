@@ -333,8 +333,10 @@ class _NHITSBlock(nn.Module):
                                                                         num_features=n_theta_adjusted, 
                                                                         activ=activ),
                                             _HiddenFeaturesLinearEncoder(in_features=n_theta_adjusted, 
-                                                                        out_features=n_theta, 
-                                                                        activ=None)]
+                                                                         out_features=n_theta, 
+                                                                         activ=None,
+                                                                         batch_normalization=False,
+                                                                         dropout_prob=0)]
 
                     else:
                         self.output_layer = [_HiddenFeaturesDownSampleEncoder(kernel_size=kernel, 
@@ -364,18 +366,20 @@ class _NHITSBlock(nn.Module):
                     if n_theta_adjusted != n_theta:
 
                         self.output_layer = [_HiddenFeaturesUpsampleEncoder(kernel_size=kernel, 
-                                                                        stride=stride, 
-                                                                        num_features=n_theta_adjusted, 
-                                                                        activ=activ),
+                                                                            stride=stride, 
+                                                                            num_features=n_theta_adjusted, 
+                                                                            activ=activ),
                                             _HiddenFeaturesLinearEncoder(in_features=n_theta_adjusted, 
-                                                                        out_features=n_theta, 
-                                                                        activ=None)]
+                                                                         out_features=n_theta, 
+                                                                         activ=None,
+                                                                         batch_normalization=False,
+                                                                         dropout_prob=0)]
 
                     else:
                         self.output_layer = [_HiddenFeaturesUpsampleEncoder(kernel_size=kernel, 
-                                                                        stride=stride, 
-                                                                        num_features=n_theta_adjusted, 
-                                                                        activ=None)]
+                                                                            stride=stride, 
+                                                                            num_features=n_theta_adjusted, 
+                                                                            activ=None)]
 
                 else:
 
@@ -389,8 +393,10 @@ class _NHITSBlock(nn.Module):
 
             else:
                 self.output_layer = [_HiddenFeaturesLinearEncoder(in_features=n_theta_hidden[-1], 
-                                                            out_features=n_theta, 
-                                                            activ=None)]
+                                                                  out_features=n_theta, 
+                                                                  activ=None,
+                                                                  batch_normalization=False,
+                                                                  dropout_prob=0)]
 
         elif output_layer == 'max':
             
@@ -411,7 +417,9 @@ class _NHITSBlock(nn.Module):
                         self.output_layer = [nn.MaxPool1d(kernel_size=kernel, stride=stride),
                                             _HiddenFeaturesLinearEncoder(in_features=n_theta_adjusted, 
                                                                         out_features=n_theta, 
-                                                                        activ=None)]
+                                                                        activ=None,
+                                                                        batch_normalization=False,
+                                                                        dropout_prob=0)]
 
                     else:
                         self.output_layer = [nn.MaxPool1d(kernel_size=kernel, stride=stride)]
@@ -425,8 +433,10 @@ class _NHITSBlock(nn.Module):
             
             else:
                 self.output_layer = [_HiddenFeaturesLinearEncoder(in_features=n_theta_hidden[-1], 
-                                                            out_features=n_theta, 
-                                                            activ=None)]
+                                                                        out_features=n_theta, 
+                                                                        activ=None,
+                                                                        batch_normalization=False,
+                                                                        dropout_prob=0)]
 
 
         layers = hidden_layers + self.output_layer
