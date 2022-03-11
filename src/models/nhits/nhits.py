@@ -253,8 +253,8 @@ class _NHITSBlock(nn.Module):
                     # if self.batch_normalization:
                     #     hidden_layers.append(nn.BatchNorm1d(num_features=n_theta_hidden[i+1]))
 
-                    if self.dropout_prob>0:
-                        hidden_layers.append(nn.Dropout(p=self.dropout_prob))
+                    # if self.dropout_prob>0:
+                    #     hidden_layers.append(nn.Dropout(p=self.dropout_prob))
                 else:
                     stride = 1
                     kernel = n_theta_hidden[i] - n_theta_hidden[i+1] + 1
@@ -281,8 +281,8 @@ class _NHITSBlock(nn.Module):
                     # if self.batch_normalization:
                     #     hidden_layers.append(nn.BatchNorm1d(num_features=n_theta_hidden[i+1]))
 
-                    if self.dropout_prob>0:
-                        hidden_layers.append(nn.Dropout(p=self.dropout_prob))
+                    # if self.dropout_prob>0:
+                    #     hidden_layers.append(nn.Dropout(p=self.dropout_prob))
                 else:
                     stride = 1
                     kernel = n_theta_hidden[i+1] - n_theta_hidden[i] + 1
@@ -587,7 +587,7 @@ class _NHITS(nn.Module):
                                                    basis=basis,
                                                    n_layers=n_layers[i],
                                                    batch_normalization=batch_normalization_block,
-                                                   dropout_prob=dropout_prob_theta,
+                                                   dropout_prob=dropout_prob_theta[i],
                                                    activation=activation)
 
                 # Select type of evaluation and apply it to all layers of block
