@@ -582,6 +582,6 @@ def hyperopt_tunning(space, hyperopt_max_evals, loss_function_val, loss_function
                              results_file=results_file,
                              loss_kwargs=loss_kwargs or {})
 
-    fmin(fmin_objective, space=space, algo=tpe.suggest, max_evals=hyperopt_max_evals, trials=trials, verbose=True)
+    fmin(fmin_objective, space=space, algo=tpe.suggest, max_evals=hyperopt_max_evals, trials=trials, verbose=False)
 
     return trials
