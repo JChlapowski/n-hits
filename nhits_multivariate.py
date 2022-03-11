@@ -31,7 +31,7 @@ def get_experiment_space(args):
                                                                 ]),
             'pooling_mode': hp.choice('pooling_mode', [ 'max' ]),
             'layer_mode': hp.choice('layer_mode', [ 'linear' ]),
-            'output_layer': hp.choice('output_layer', [ 'max' ]),
+            'output_layer': hp.choice('output_layer', [ 'conv' ]),
             'interpolation_mode': hp.choice('interpolation_mode', ['linear']),
             # Regularization and optimization parameters
             'batch_normalization': hp.choice('batch_normalization', [False]),
