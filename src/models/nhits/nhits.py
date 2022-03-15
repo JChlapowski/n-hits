@@ -667,7 +667,7 @@ class _NHITS(nn.Module):
                                                    basis=basis,
                                                    n_layers=n_layers[i],
                                                    batch_normalization=batch_normalization_block,
-                                                   dropout_prob=dropout_prob_theta[i],
+                                                   dropout_prob=dropout_prob_theta,
                                                    activation=activation)
 
                 # Select type of evaluation and apply it to all layers of block
