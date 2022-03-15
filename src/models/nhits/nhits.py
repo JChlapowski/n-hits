@@ -223,7 +223,7 @@ def init_weights(module, initialization):
         elif initialization == 'glorot_normal':
             t.nn.init.xavier_normal_(module.weight)
         elif initialization == 'Sin':
-            siren_uniform_(module.weight, 6)
+            siren_uniform_(module.weight, mode='fan_in', c=6)
         elif initialization == 'lecun_normal':
             pass #t.nn.init.normal_(module.weight, 0.0, std=1/np.sqrt(module.weight.numel()))
         else:
