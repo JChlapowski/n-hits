@@ -16,6 +16,30 @@ from functools import partial
 from ..components.common import RepeatVector
 from ...losses.utils import LossFunction
 
+class Sine(nn.Module):
+    def __init__(self, w0: float = 1.0):
+        """Sine activation function with w0 scaling support.
+        Example:
+            >>> w = torch.tensor([3.14, 1.57])
+            >>> Sine(w0=1)(w)
+            torch.Tensor([0, 1])
+        :param w0: w0 in the activation step `act(x; w0) = sin(w0 * x)`.
+            defaults to 1.0
+        :type w0: float, optional
+        """
+        super(Sine, self).__init__()
+        self.w0 = w0
+
+    def forward(self, x: t.Tensor) -> t.Tensor:
+        self._check_input(x)
+        return t.sin(self.w0 * x)
+
+    @staticmethod
+    def _check_input(x):
+        if not isinstance(x, t.Tensor):
+            raise TypeError(
+                'input to forward() must be torch.xTensor')
+
 # Cell
 class _StaticFeaturesEncoder(nn.Module):
     def __init__(self, in_features, out_features):
@@ -181,7 +205,8 @@ ACTIVATIONS = ['ReLU',
                'SELU',
                'LeakyReLU',
                'PReLU',
-               'Sigmoid']
+               'Sigmoid',
+               'Sin']
 
 class _NHITSBlock(nn.Module):
     """
@@ -197,7 +222,7 @@ class _NHITSBlock(nn.Module):
 
         assert (pooling_mode in ['max','conv'])
 
-        n_time_in_pooled = int(np.ceil(n_time_in/n_freq_downsample))
+        n_time_in_pooled = int(np.ceil(n_time_in/n_pool_kernel_size))
 
         if n_s == 0:
             n_s_hidden = 0
@@ -218,27 +243,39 @@ class _NHITSBlock(nn.Module):
         self.dropout_prob = dropout_prob
         
         assert activation in ACTIVATIONS, f'{activation} is not in {ACTIVATIONS}'
-        activ = getattr(nn, activation)()
+        
+        if activation != 'Sin':
+            activ = getattr(nn, activation)()
+        else:
+            activ = Sine()
 
 
 
         if self.pooling_mode == 'max':
-            kernel = n_freq_downsample
-            stride = kernel
-            self.pooling_layer = nn.MaxPool1d(kernel_size=kernel,
-                                              stride=stride)
+
+            self.pooling_layer = nn.MaxPool1d(kernel_size=self.n_pool_kernel_size,
+                                              stride=self.n_pool_kernel_size)
+            
+            # kernel = n_freq_downsample
+            # stride = kernel
+            # self.pooling_layer = nn.MaxPool1d(kernel_size=kernel,
+            #                                   stride=stride)
         # elif pooling_mode == 'conv':
         #     self.pooling_layer = nn.Conv1d(1, 1, kernel_size=self.n_pool_kernel_size, stride=self.n_pool_kernel_size)
             
         hidden_layers = []
 
         if self.pooling_mode == 'conv':
-            kernel = n_freq_downsample
-            stride = kernel
-            hidden_layers.append(_HiddenFeaturesDownSampleEncoder(kernel_size=kernel,
-                                                                  stride=stride,
-                                                                  num_features=n_theta_hidden[0],
-                                                                  activ=None))
+
+            hidden_layers.append(_HiddenFeaturesDownSampleEncoder(kernel_size=self.n_pool_kernel_size,
+                                                                  stride=self.n_pool_kernel_size))
+
+            # kernel = n_freq_downsample
+            # stride = kernel
+            # hidden_layers.append(_HiddenFeaturesDownSampleEncoder(kernel_size=kernel,
+            #                                                       stride=stride,
+            #                                                       num_features=n_theta_hidden[0],
+            #                                                       activ=None))
         
         for i in range(n_layers):
             
