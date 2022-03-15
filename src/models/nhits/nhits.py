@@ -1,5 +1,6 @@
 # Cell
 import math
+from operator import mod
 from platform import python_implementation
 import random
 import numpy as np
@@ -15,6 +16,36 @@ from functools import partial
 
 from ..components.common import RepeatVector
 from ...losses.utils import LossFunction
+
+from torch.nn.init import _calculate_correct_fan
+
+def siren_uniform_(tensor: t.Tensor, mode: str = 'fan_in', c: float = 6):
+    r"""Fills the input `Tensor` with values according to the method
+    described in ` Implicit Neural Representations with Periodic Activation
+    Functions.` - Sitzmann, Martel et al. (2020), using a
+    uniform distribution. The resulting tensor will have values sampled from
+    :math:`\mathcal{U}(-\text{bound}, \text{bound})` where
+    .. math::
+        \text{bound} = \sqrt{\frac{6}{\text{fan\_mode}}}
+    Also known as Siren initialization.
+    Examples:
+        >>> w = torch.empty(3, 5)
+        >>> siren.init.siren_uniform_(w, mode='fan_in', c=6)
+    :param tensor: an n-dimensional `torch.Tensor`
+    :type tensor: torch.Tensor
+    :param mode: either ``'fan_in'`` (default) or ``'fan_out'``. Choosing
+        ``'fan_in'`` preserves the magnitude of the variance of the weights in
+        the forward pass. Choosing ``'fan_out'`` preserves the magnitudes in
+        the backwards pass.s
+    :type mode: str, optional
+    :param c: value used to compute the bound. defaults to 6
+    :type c: float, optional
+    """
+    fan = _calculate_correct_fan(tensor, mode)
+    std = 1 / math.sqrt(fan)
+    bound = math.sqrt(c) * std  # Calculate uniform bounds from standard deviation
+    with t.no_grad():
+        return tensor.uniform_(-bound, bound)
 
 class Sine(nn.Module):
     def __init__(self, w0: float = 1.0):
@@ -191,12 +222,15 @@ def init_weights(module, initialization):
             t.nn.init.xavier_uniform_(module.weight)
         elif initialization == 'glorot_normal':
             t.nn.init.xavier_normal_(module.weight)
+        elif initialization == 'Sin':
+            siren_uniform_(module.weight, 6)
         elif initialization == 'lecun_normal':
             pass #t.nn.init.normal_(module.weight, 0.0, std=1/np.sqrt(module.weight.numel()))
         else:
             assert 1<0, f'Initialization {initialization} not found'
     elif type(module) == t.nn.Conv1d or type(module) == t.nn.ConvTranspose1d:
         t.nn.init.kaiming_uniform_(module.weight, nonlinearity='relu')
+
 
 # Cell
 ACTIVATIONS = ['ReLU',
@@ -247,7 +281,7 @@ class _NHITSBlock(nn.Module):
         if activation != 'Sin':
             activ = getattr(nn, activation)()
         else:
-            activ = Sine()
+            activ = Sine(30.0)
 
 
 
@@ -341,6 +375,8 @@ class _NHITSBlock(nn.Module):
                                                                   activ=activ,
                                                                   batch_normalization=self.batch_normalization,
                                                                   dropout_prob=self.dropout_prob))
+
+                activ = Sine(1.0)
 
                 # if self.batch_normalization:
                 #     #print("Applying batch norm")
