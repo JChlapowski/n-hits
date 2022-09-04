@@ -228,8 +228,6 @@ class StochasticPool1D(nn.Module):
 
         x = x.unfold(1, self.kernel_size, self.stride)
         print(x.shape)
-        x = x.contiguous().view(-1, 3)
-        print(x.shape)
 
         x = t.stack([
                  self.gen_random(x_i) for i, x_i in enumerate(t.unbind(x, dim=0), 0)
