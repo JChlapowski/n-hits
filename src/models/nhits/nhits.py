@@ -281,7 +281,7 @@ class _NHITSBlock(nn.Module):
         """
         super().__init__()
 
-        assert (pooling_mode in ['max','conv'])
+        assert (pooling_mode in ['max','conv', 'stochastic'])
 
         n_time_in_pooled = int(np.ceil(n_time_in/n_pool_kernel_size))
 
@@ -571,7 +571,7 @@ class _NHITSBlock(nn.Module):
             print(insample_y.shape)
             insample_y = self.pooling_layer(insample_y)
             print(insample_y.shape)
-            
+
         #print("Input size after to pooling: " + str(insample_y.size()))
         #print("Post applying conv pooling")
         #print(insample_y.shape)
