@@ -573,9 +573,9 @@ class _NHITSBlock(nn.Module):
             insample_y = insample_y.squeeze(1)
 
         elif self.pooling_mode == 'stochastic':
-            print(insample_y.shape)
+            # print(insample_y.shape)
             insample_y = self.pooling_layer(insample_y)
-            print(insample_y.shape)
+            # print(insample_y.shape)
 
         #print("Input size after to pooling: " + str(insample_y.size()))
         #print("Post applying conv pooling")
