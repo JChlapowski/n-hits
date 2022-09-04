@@ -216,6 +216,7 @@ class StochasticPool1D(nn.Module):
         self.stride = stride
 
     def gen_random(self, values):
+        print(values)
         if t.sum(values) != 0:
             idx = t.multinomial(values, num_samples=1)
         else:
