@@ -232,11 +232,8 @@ class StochasticPool1D(nn.Module):
                  self.gen_random(x_i) for i, x_i in enumerate(t.unbind(x, dim=0), 0)
                 ], dim=0)
         
-        x = x.contiguous().view(init_size)
-        
+        x = x.contiguous().view(init_size[0], init_size[1]/self.stride)
         return x
-    
-
     
 
 # Cell
@@ -327,6 +324,10 @@ class _NHITSBlock(nn.Module):
         # elif pooling_mode == 'conv':
         #     self.pooling_layer = nn.Conv1d(1, 1, kernel_size=self.n_pool_kernel_size, stride=self.n_pool_kernel_size)
             
+        elif self.pooling_mode == 'stochastic':
+            self.pooling_layer = StochasticPool1D(kernel=self.n_pool_kernel_size,
+                                                  stride=self.n_pool_kernel_size)
+
         hidden_layers = []
 
         if self.pooling_mode == 'conv':
@@ -559,15 +560,18 @@ class _NHITSBlock(nn.Module):
 
         #print("Input size prior to pooling: " + str(insample_y.size()))
         if self.pooling_mode == 'max':
-            print(insample_y.shape)
             insample_y = insample_y.unsqueeze(1)
             # Pooling layer to downsample input
             #print("Before applying conv pooling")
             #print(insample_y.shape)
             insample_y = self.pooling_layer(insample_y)
             insample_y = insample_y.squeeze(1)
-            print(insample_y.shape)
 
+        elif self.pooling_mode == 'stochasic':
+            print(insample_y.shape)
+            insample_y = self.pooling_layer(insample_y)
+            print(insample_y.shape)
+            
         #print("Input size after to pooling: " + str(insample_y.size()))
         #print("Post applying conv pooling")
         #print(insample_y.shape)

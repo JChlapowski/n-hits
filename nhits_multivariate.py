@@ -32,7 +32,7 @@ def get_experiment_space(args):
                                                                   [180, 60, 1], [60, 8, 1],
                                                                   [40, 20, 1]
                                                                 ]),
-            'pooling_mode': hp.choice('pooling_mode', [ 'max' ]),
+            'pooling_mode': hp.choice('pooling_mode', [ 'stochastic' ]),
             'layer_mode': hp.choice('layer_mode', [ 'linear' ]),
             'output_layer': hp.choice('output_layer', [ 'linear' ]),
             'interpolation_mode': hp.choice('interpolation_mode', ['linear']),
