@@ -9,7 +9,7 @@ pytorch_lightning==1.5.10
 requests==2.23.0
 scikit_learn==1.0.2
 statsmodels==0.13.2
-torch==1.10.0
+torch==1.12.1
 tqdm==4.62.1
 typing_extensions==3.10.0.0
 tf-estimator-nightly==2.8.0.dev2021122109
