@@ -107,6 +107,8 @@ class _HiddenFeaturesLinearEncoder(nn.Module):
 
     def forward(self, x):
 
+        print(x.size())
+
         if len(x.size()) == 3:
 
             x = x.squeeze(1)
@@ -208,6 +210,36 @@ class IdentityBasis(nn.Module):
                 forecast[i*batch_size:(i+1)*batch_size] += forecast_i[:,0,0,:]
 
         return backcast, forecast
+
+class StochasticPool1D(nn.Module):
+    def __init__(self, kernel_size, stride):
+        super(StochasticPool1D, self).__init__()
+        self.kernel_size = kernel_size 
+        self.stride = stride
+
+    def gen_random(self, values):
+        if t.sum(values) != 0:
+            idx = t.multinomial(values, num_samples=1)
+        else:
+            idx = t.randint(0, values.shape[0], size=(1,)).type(t.LongTensor)
+        return values[idx]
+
+    def forward(self, x):
+        init_size = x.shape
+
+        x = x.unfold(2, self.kernel_size, self.stride)
+        x = x.contiguous().view(-1, 3)
+
+        x = t.stack([
+                 self.gen_random(x_i) for i, x_i in enumerate(t.unbind(x, dim=0), 0)
+                ], dim=0)
+        
+        x = x.contiguous().view(init_size)
+        
+        return x
+    
+
+    
 
 # Cell
 def init_weights(module, initialization):
@@ -376,7 +408,7 @@ class _NHITSBlock(nn.Module):
                                                                   batch_normalization=self.batch_normalization,
                                                                   dropout_prob=self.dropout_prob))
 
-                activ = Sine(1.0)
+                # activ = Sine(1.0)
 
                 # if self.batch_normalization:
                 #     #print("Applying batch norm")
