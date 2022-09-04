@@ -240,9 +240,8 @@ class StochasticPool1D(nn.Module):
         x = t.take(x, idx)
 
         print(x.shape)
-        print(init_size[0])
-        print(init_size[1])
-        x = x.contiguous().view(init_size[0], init_size[1]/self.kernel_size)
+
+        x = x.contiguous().view((init_size[0], init_size[1]/self.kernel_size))
 
         print(x.shape)
 
