@@ -229,21 +229,14 @@ class StochasticPool1D(nn.Module):
         init_size = x.shape
 
         x = x.unfold(1, self.kernel_size, self.stride)
-        print(x.shape)
+
         x = x.contiguous().view(-1, self.kernel_size)
-        print(x.shape)
     
         idx = t.randint(0, x.shape[1], size=(x.shape[0],)).type(t.cuda.LongTensor)
         
-        print(idx.shape)
-
         x = t.take(x, idx)
 
-        print(x.shape)
-
         x = x.contiguous().view(init_size[0], int(init_size[1]/self.kernel_size))
-
-        print(x.shape)
 
         return x
     
