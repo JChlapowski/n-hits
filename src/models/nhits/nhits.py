@@ -222,7 +222,7 @@ class StochasticPool1D(nn.Module):
         # else:
         
         idx = t.randint(0, values.shape[0], size=(1,)).type(t.LongTensor)
-        print(idx)
+        # print(idx)
         return values[idx]
 
     def forward(self, x):
@@ -238,6 +238,7 @@ class StochasticPool1D(nn.Module):
                 ], dim=0)
         
         x = x.contiguous().view(init_size[0], init_size[1]/self.stride)
+        print(x)
         return x
     
 
