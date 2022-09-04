@@ -216,20 +216,22 @@ class StochasticPool1D(nn.Module):
         self.stride = stride
 
     def gen_random(self, values):
-        print(values)
-        if t.sum(values) != 0:
-            idx = t.multinomial(values, num_samples=1)
-        else:
-            idx = t.randint(0, values.shape[0], size=(1,)).type(t.LongTensor)
+        # print(values)
+        # if t.sum(values) != 0:
+        #     idx = t.multinomial(values, num_samples=1)
+        # else:
+        
+        idx = t.randint(0, values.shape[0], size=(1,)).type(t.LongTensor)
+        print(idx)
         return values[idx]
 
     def forward(self, x):
         init_size = x.shape
 
         x = x.unfold(1, self.kernel_size, self.stride)
-        print(x.shape)
+        # print(x.shape)
         x = x.contiguous().view(-1, self.kernel_size)
-        print(x.shape)
+        # print(x.shape)
 
         x = t.stack([
                  self.gen_random(x_i) for i, x_i in enumerate(t.unbind(x, dim=0), 0)
