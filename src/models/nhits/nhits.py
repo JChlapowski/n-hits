@@ -107,8 +107,6 @@ class _HiddenFeaturesLinearEncoder(nn.Module):
 
     def forward(self, x):
 
-        print(x.size())
-
         if len(x.size()) == 3:
 
             x = x.squeeze(1)
@@ -567,6 +565,7 @@ class _NHITSBlock(nn.Module):
             #print(insample_y.shape)
             insample_y = self.pooling_layer(insample_y)
             insample_y = insample_y.squeeze(1)
+            print(insample_y.shape)
 
         #print("Input size after to pooling: " + str(insample_y.size()))
         #print("Post applying conv pooling")
