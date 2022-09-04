@@ -559,6 +559,7 @@ class _NHITSBlock(nn.Module):
 
         #print("Input size prior to pooling: " + str(insample_y.size()))
         if self.pooling_mode == 'max':
+            print(insample_y.shape)
             insample_y = insample_y.unsqueeze(1)
             # Pooling layer to downsample input
             #print("Before applying conv pooling")
