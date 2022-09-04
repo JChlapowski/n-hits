@@ -325,7 +325,7 @@ class _NHITSBlock(nn.Module):
         #     self.pooling_layer = nn.Conv1d(1, 1, kernel_size=self.n_pool_kernel_size, stride=self.n_pool_kernel_size)
             
         elif self.pooling_mode == 'stochastic':
-            self.pooling_layer = StochasticPool1D(kernel=self.n_pool_kernel_size,
+            self.pooling_layer = StochasticPool1D(kernel_size=self.n_pool_kernel_size,
                                                   stride=self.n_pool_kernel_size)
 
         hidden_layers = []
@@ -567,7 +567,7 @@ class _NHITSBlock(nn.Module):
             insample_y = self.pooling_layer(insample_y)
             insample_y = insample_y.squeeze(1)
 
-        elif self.pooling_mode == 'stochasic':
+        elif self.pooling_mode == 'stochastic':
             print(insample_y.shape)
             insample_y = self.pooling_layer(insample_y)
             print(insample_y.shape)
