@@ -19,7 +19,7 @@ def get_experiment_space(args):
             'n_s_hidden': hp.choice('n_s_hidden', [0]),
             'shared_weights': hp.choice('shared_weights', [False]),
             'activation': hp.choice('activation', ['ReLU']),
-            'initialization':  hp.choice('initialization', ['ReLU']),
+            'initialization':  hp.choice('initialization', ['lecun_normal']),
             'stack_types': hp.choice('stack_types', [ 3*['identity'] ]),
             'n_blocks': hp.choice('n_blocks', [ 3*[1]]),
             'n_layers': hp.choice('n_layers', [ 9*[2] ]),
