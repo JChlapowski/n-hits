@@ -225,7 +225,7 @@ class StochasticPool1D(nn.Module):
     def forward(self, x):
         init_size = x.shape
 
-        x = x.unfold(2, self.kernel_size, self.stride)
+        x = x.unfold(1, self.kernel_size, self.stride)
         x = x.contiguous().view(-1, 3)
 
         x = t.stack([
