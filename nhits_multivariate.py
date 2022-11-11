@@ -28,11 +28,12 @@ def get_experiment_space(args):
                                                                     3*[4], 3*[8], [8, 4, 1], [16, 8, 1] 
                                                                     #[0, 0, 0]
                                                                     ]),
-            'n_freq_downsample': hp.choice('n_freq_downsample', [ [168, 24, 1], [24, 12, 1],
+            'n_freq_downsample': hp.choice('n_freq_downsample', [ 
+                                                                  [168, 24, 1], [24, 12, 1],
                                                                   [180, 60, 1], [60, 8, 1],
                                                                   [40, 20, 1]
                                                                 ]),
-            'pooling_mode': hp.choice('pooling_mode', [ 'stochastic' ]),
+            'pooling_mode': hp.choice('pooling_mode', [ 'max' ]),
             'layer_mode': hp.choice('layer_mode', [ 'linear' ]),
             'output_layer': hp.choice('output_layer', [ 'linear' ]),
             'interpolation_mode': hp.choice('interpolation_mode', ['linear']),
